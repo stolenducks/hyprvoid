@@ -342,7 +342,13 @@ Menu: SUPER+ALT+SPACE"
 
 # ========== SYSTEM MENU ==========
 show_system_menu() {
-  local options="  Lock
+  # Prevent multiple instances
+  if pgrep -f "dmenu.*System" >/dev/null 2>&1; then
+    pkill -f "dmenu.*System"
+    exit 0
+  fi
+  
+  local options="󰍃  Lock
 󰤄  Suspend
 󰜉  Restart
 󰐥  Shutdown"
@@ -352,12 +358,8 @@ show_system_menu() {
   
   case "$choice" in
     *Lock*)
-      if command -v hyprlock >/dev/null 2>&1; then
-        hyprlock
-      elif command -v gtklock >/dev/null 2>&1; then
-        gtklock
-      else
-        loginctl lock-session
+      if confirm "Exit Hyprland?"; then
+        hyprctl dispatch exit
       fi
       ;;
     *Suspend*)
