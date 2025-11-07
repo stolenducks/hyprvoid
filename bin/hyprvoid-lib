@@ -1,0 +1,192 @@
+#!/usr/bin/env bash
+# HyprVoid shared library - sourced by all hyprvoid scripts
+# Provides common utilities for menus, notifications, theme detection, etc.
+
+set -Eeuo pipefail
+
+# === Logging & Notifications ===
+
+HYPRVOID_LOG_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/hyprvoid"
+HYPRVOID_LOG="$HYPRVOID_LOG_DIR/log"
+
+log() {
+  mkdir -p "$HYPRVOID_LOG_DIR"
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" >> "$HYPRVOID_LOG"
+}
+
+notify() {
+  local title="$1"
+  local message="${2:-}"
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send "$title" "$message"
+  else
+    echo "$title: $message"
+  fi
+  log "NOTIFY: $title - $message"
+}
+
+# === Launcher Detection ===
+
+choose_launcher() {
+  if command -v wofi >/dev/null 2>&1; then
+    echo "wofi"
+  elif command -v fuzzel >/dev/null 2>&1; then
+    echo "fuzzel"
+  elif command -v bemenu >/dev/null 2>&1; then
+    echo "bemenu"
+  else
+    echo "none"
+  fi
+}
+
+# === Menu Utilities ===
+
+dmenu() {
+  local prompt="${1:-Select}"
+  shift || true
+  local launcher
+  launcher="$(choose_launcher)"
+  
+  case "$launcher" in
+    wofi)
+      wofi --dmenu --prompt "$prompt" \
+        --conf "${HOME}/.config/wofi/config" \
+        --style "${HOME}/.config/wofi/style.css" "$@"
+      ;;
+    fuzzel)
+      fuzzel --dmenu --prompt "$prompt: " "$@"
+      ;;
+    bemenu)
+      bemenu -p "$prompt: " "$@"
+      ;;
+    *)
+      notify "Error" "No menu launcher found. Install wofi, fuzzel, or bemenu"
+      return 1
+      ;;
+  esac
+}
+
+confirm() {
+  local prompt="${1:-Confirm action?}"
+  printf "No\nYes\n" | dmenu "$prompt" | grep -qi "^Yes$"
+}
+
+# === Theme Detection ===
+
+detect_theme() {
+  local looknfeel="${HOME}/.config/hypr/looknfeel.conf"
+  
+  if [[ -f "$looknfeel" ]]; then
+    if grep -q "looknfeel-light" "$looknfeel"; then
+      echo "light"
+    else
+      echo "dark"
+    fi
+  else
+    echo "dark"  # Default
+  fi
+}
+
+# === Process Management ===
+
+pidfile_path() {
+  local name="$1"
+  echo "$HYPRVOID_LOG_DIR/${name}.pid"
+}
+
+is_running() {
+  local name="$1"
+  local pidfile
+  pidfile="$(pidfile_path "$name")"
+  
+  if [[ -f "$pidfile" ]]; then
+    local pid
+    pid="$(cat "$pidfile")"
+    if kill -0 "$pid" 2>/dev/null; then
+      return 0
+    else
+      rm -f "$pidfile"
+      return 1
+    fi
+  fi
+  return 1
+}
+
+save_pid() {
+  local name="$1"
+  local pid="$2"
+  mkdir -p "$HYPRVOID_LOG_DIR"
+  echo "$pid" > "$(pidfile_path "$name")"
+}
+
+kill_by_pidfile() {
+  local name="$1"
+  local pidfile
+  pidfile="$(pidfile_path "$name")"
+  
+  if [[ -f "$pidfile" ]]; then
+    local pid
+    pid="$(cat "$pidfile")"
+    if kill -0 "$pid" 2>/dev/null; then
+      kill "$pid" 2>/dev/null || true
+      rm -f "$pidfile"
+      return 0
+    else
+      rm -f "$pidfile"
+    fi
+  fi
+  return 1
+}
+
+# === Terminal Execution ===
+
+run_in_terminal() {
+  local cmd="$*"
+  local term
+  
+  # Detect available terminal
+  for t in foot alacritty kitty xterm; do
+    if command -v "$t" >/dev/null 2>&1; then
+      term="$t"
+      break
+    fi
+  done
+  
+  if [[ -z "${term:-}" ]]; then
+    notify "Error" "No terminal emulator found"
+    return 1
+  fi
+  
+  case "$term" in
+    foot|alacritty|kitty)
+      "$term" -e bash -c "$cmd; echo; read -n 1 -s -r -p 'Press any key to close...'"
+      ;;
+    *)
+      "$term" -e bash -c "$cmd"
+      ;;
+  esac
+}
+
+# === Tool Detection ===
+
+require_tool() {
+  local tool="$1"
+  local package="${2:-$tool}"
+  
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    notify "Missing Tool" "$tool is not installed. Install: sudo xbps-install -S $package"
+    log "ERROR: Missing tool $tool (package: $package)"
+    return 1
+  fi
+  return 0
+}
+
+optional_tool() {
+  local tool="$1"
+  command -v "$tool" >/dev/null 2>&1
+}
+
+# Export functions for subshells if needed
+export -f log notify dmenu confirm detect_theme
+export -f is_running save_pid kill_by_pidfile pidfile_path
+export -f run_in_terminal require_tool optional_tool

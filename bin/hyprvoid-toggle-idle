@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# HyprVoid Toggle Idle Management
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+toggle_hypridle() {
+  if pgrep -x hypridle >/dev/null; then
+    killall hypridle
+    notify "Idle Lock" "Disabled"
+    log "hypridle disabled"
+  else
+    hypridle &
+    notify "Idle Lock" "Enabled"
+    log "hypridle enabled"
+  fi
+}
+
+toggle_swayidle() {
+  if pgrep -x swayidle >/dev/null; then
+    killall swayidle
+    notify "Idle Lock" "Disabled"
+    log "swayidle disabled"
+  else
+    swayidle &
+    notify "Idle Lock" "Enabled"
+    log "swayidle enabled"
+  fi
+}
+
+# Prefer hypridle, fallback to swayidle
+if command -v hypridle >/dev/null 2>&1; then
+  toggle_hypridle
+elif command -v swayidle >/dev/null 2>&1; then
+  toggle_swayidle
+else
+  notify "Idle Management" "No idle manager found. Install hypridle or swayidle"
+fi

@@ -1,0 +1,86 @@
+/* Catppuccin Latte - Light Theme for Wofi */
+/* Color palette: https://github.com/catppuccin/catppuccin */
+
+* {
+  font-family: "Noto Sans", "Font Awesome 6 Free";
+  font-size: 12px;
+  border-radius: 0;
+}
+
+window {
+  margin: 0;
+  padding: 0;
+  border: 2px solid #1e66f5;  /* Blue */
+  background-color: #eff1f5;  /* Base */
+  border-radius: 0;
+}
+
+#input {
+  margin: 10px;
+  padding: 10px;
+  border: none;
+  color: #4c4f69;             /* Text */
+  background-color: #e6e9ef;  /* Mantle */
+  border-radius: 0;
+}
+
+#inner-box {
+  margin: 0;
+  padding: 10px;
+  border: none;
+  background-color: transparent;
+}
+
+#outer-box {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+#scroll {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+#entry {
+  padding: 8px 12px;
+  margin: 2px 0;
+  border-radius: 0;
+}
+
+#text {
+  margin: 6px;
+  padding: 4px;
+  color: #4c4f69;  /* Text */
+}
+
+#entry:selected {
+  background-color: #ccd0da;  /* Surface0 */
+  border-radius: 0;
+}
+
+#entry:selected #text {
+  color: #1e66f5;  /* Blue */
+}
+
+#img {
+  margin-right: 10px;
+  padding: 0;
+}
+
+/* Hide action arrows */
+arrow {
+  opacity: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+#entry arrow {
+  opacity: 0;
+  min-width: 0;
+  min-height: 0;
+}

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# HyprVoid Keybindings Viewer - Show all keybindings in a searchable menu
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+BINDINGS_FILE="$HOME/.config/hypr/bindings.conf"
+
+# Parse bindings from config file
+parse_bindings() {
+  if [[ ! -f "$BINDINGS_FILE" ]]; then
+    echo "Error: Bindings file not found"
+    return 1
+  fi
+  
+  # Extract bindings with descriptions
+  grep "#desc:" "$BINDINGS_FILE" | while IFS= read -r line; do
+    # Extract the binding part (before #desc:)
+    binding=$(echo "$line" | sed 's/#desc:.*//' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+    
+    # Extract description
+    desc=$(echo "$line" | sed 's/.*#desc:[[:space:]]*//')
+    
+    # Parse the binding to get the key combination
+    # Format: bind[type] = MODS, KEY, exec, command
+    if [[ "$binding" =~ bind[delm]*[[:space:]]*=[[:space:]]*([^,]+),[[:space:]]*([^,]+), ]]; then
+      mods="${BASH_REMATCH[1]}"
+      key="${BASH_REMATCH[2]}"
+      
+      # Clean up mods and key
+      mods=$(echo "$mods" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      key=$(echo "$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      
+      # Format: "KEY_COMBO → Description"
+      if [[ -n "$mods" && "$mods" != "\$mod" ]]; then
+        # Replace $mod with SUPER
+        mods=$(echo "$mods" | sed 's/\$mod/SUPER/g')
+        combo="$mods + $key"
+      elif [[ "$mods" == "\$mod" ]]; then
+        combo="SUPER + $key"
+      else
+        combo="$key"
+      fi
+      
+      # Clean up combo
+      combo=$(echo "$combo" | sed 's/[[:space:]]+/ /g' | sed 's/+ ,/,/g')
+      
+      printf "%-40s → %s\n" "$combo" "$desc"
+    fi
+  done | sort
+}
+
+# Display in wofi
+show_menu() {
+  local bindings
+  bindings="$(parse_bindings)"
+  
+  if [[ -z "$bindings" ]]; then
+    notify "Keybindings" "No keybindings found"
+    exit 0
+  fi
+  
+  local selected
+  selected=$(echo "$bindings" | dmenu "Keybindings" --width 900 --height 600)
+  
+  # If something was selected, copy the keybinding to clipboard
+  if [[ -n "$selected" ]] && command -v wl-copy >/dev/null 2>&1; then
+    keybind=$(echo "$selected" | awk -F' → ' '{print $1}' | sed 's/[[:space:]]*$//')
+    echo -n "$keybind" | wl-copy
+    notify "Keybinding Copied" "$keybind"
+  fi
+}
+
+show_menu

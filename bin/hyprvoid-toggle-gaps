@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# HyprVoid Toggle Workspace Gaps
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+STATE_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/hyprvoid/gaps-state"
+
+# Check current state
+if [[ -f "$STATE_FILE" ]] && [[ "$(cat "$STATE_FILE")" == "off" ]]; then
+  # Turn gaps on
+  hyprctl keyword general:gaps_in 5
+  hyprctl keyword general:gaps_out 10
+  echo "on" > "$STATE_FILE"
+  notify "Workspace Gaps" "Enabled"
+  log "Gaps enabled"
+else
+  # Turn gaps off
+  hyprctl keyword general:gaps_in 0
+  hyprctl keyword general:gaps_out 0
+  mkdir -p "$(dirname "$STATE_FILE")"
+  echo "off" > "$STATE_FILE"
+  notify "Workspace Gaps" "Disabled"
+  log "Gaps disabled"
+fi

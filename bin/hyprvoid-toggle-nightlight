@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# HyprVoid Toggle Nightlight
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+PIDFILE_NAME="nightlight"
+
+toggle_tool() {
+  local tool="$1"
+  shift
+  local args="$*"
+  
+  if is_running "$PIDFILE_NAME"; then
+    kill_by_pidfile "$PIDFILE_NAME"
+    notify "Nightlight" "Disabled"
+    log "Nightlight ($tool) disabled"
+  else
+    $tool $args &
+    save_pid "$PIDFILE_NAME" $!
+    notify "Nightlight" "Enabled"
+    log "Nightlight ($tool) enabled"
+  fi
+}
+
+# Detect and toggle available nightlight tool
+if command -v hyprsunset >/dev/null 2>&1; then
+  toggle_tool hyprsunset -t 4000
+elif command -v gammastep >/dev/null 2>&1; then
+  toggle_tool gammastep -O 4000
+elif command -v wlsunset >/dev/null 2>&1; then
+  toggle_tool wlsunset -T 4000
+else
+  notify "Nightlight" "No nightlight tool found. Install hyprsunset, gammastep, or wlsunset"
+fi

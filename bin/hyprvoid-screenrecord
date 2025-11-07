@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# HyprVoid Screen Recording Toggle
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+PIDFILE_NAME="screenrecord"
+OUTPUT_DIR="$HOME/Videos/screenrecords"
+
+# Create output directory
+mkdir -p "$OUTPUT_DIR"
+
+if ! command -v wf-recorder >/dev/null 2>&1; then
+  notify "Screen Record" "wf-recorder not installed. Install: sudo xbps-install -S wf-recorder"
+  exit 1
+fi
+
+if is_running "$PIDFILE_NAME"; then
+  # Stop recording
+  kill_by_pidfile "$PIDFILE_NAME"
+  notify "Screen Record" "Recording stopped"
+  log "Screen recording stopped"
+else
+  # Start recording
+  output_file="$OUTPUT_DIR/screenrecord-$(date +%Y%m%d-%H%M%S).mp4"
+  
+  # Use slurp to select area if available
+  if command -v slurp >/dev/null 2>&1; then
+    geometry=$(slurp 2>/dev/null || echo "")
+    if [[ -n "$geometry" ]]; then
+      wf-recorder -g "$geometry" -f "$output_file" &
+    else
+      wf-recorder -f "$output_file" &
+    fi
+  else
+    wf-recorder -f "$output_file" &
+  fi
+  
+  save_pid "$PIDFILE_NAME" $!
+  notify "Screen Record" "Recording started"
+  log "Screen recording started: $output_file"
+fi

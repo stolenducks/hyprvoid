@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# HyprVoid Toggle Waybar
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+if pgrep -x waybar >/dev/null; then
+  killall waybar
+  notify "Waybar" "Hidden"
+  log "Waybar hidden"
+else
+  waybar &
+  notify "Waybar" "Shown"
+  log "Waybar shown"
+fi

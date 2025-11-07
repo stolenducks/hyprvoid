@@ -1,0 +1,394 @@
+#!/usr/bin/env bash
+# HyprVoid Main Menu - Omarchy-inspired menu system for Void Linux
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+# Main menu options
+show_main_menu() {
+  local options="󰀻  Apps
+󰧑  Learn
+󱓞  Trigger
+  Style
+  Setup
+󰉉  Install
+󰭌  Remove
+  Update
+  About
+  System"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "HyprVoid Menu")
+  
+  case "$choice" in
+    *Apps*)     show_apps_menu ;;
+    *Learn*)    show_learn_menu ;;
+    *Trigger*)  show_trigger_menu ;;
+    *Style*)    show_style_menu ;;
+    *Setup*)    show_setup_menu ;;
+    *Install*)  show_install_menu ;;
+    *Remove*)   show_remove_menu ;;
+    *Update*)   show_update_menu ;;
+    *About*)    show_about_menu ;;
+    *System*)   show_system_menu ;;
+    *) exit 0 ;;
+  esac
+}
+
+# ========== APPS MENU ==========
+show_apps_menu() {
+  if command -v walker >/dev/null 2>&1; then
+    walker
+  elif command -v wofi >/dev/null 2>&1; then
+    wofi --show drun
+  else
+    notify "App Launcher" "No launcher found. Install walker or wofi"
+  fi
+}
+
+# ========== LEARN MENU ==========
+show_learn_menu() {
+  local options="  Keybindings
+  Hyprland Wiki
+󰣇  Void Linux Docs
+󱆃  Bash Cheatsheet"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Learn")
+  
+  case "$choice" in
+    *Keybindings*)
+      "$SCRIPT_DIR/hyprvoid-menu-keybindings"
+      ;;
+    *Hyprland*)
+      xdg-open "https://wiki.hyprland.org/" 2>/dev/null || notify "Learn" "Opening Hyprland wiki..."
+      ;;
+    *Void*)
+      xdg-open "https://docs.voidlinux.org/" 2>/dev/null || notify "Learn" "Opening Void docs..."
+      ;;
+    *Bash*)
+      xdg-open "https://devhints.io/bash" 2>/dev/null || notify "Learn" "Opening Bash cheatsheet..."
+      ;;
+  esac
+}
+
+# ========== TRIGGER MENU ==========
+show_trigger_menu() {
+  local options="  Capture
+  Share
+󰔎  Toggle"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Trigger")
+  
+  case "$choice" in
+    *Capture*) show_capture_menu ;;
+    *Share*)   show_share_menu ;;
+    *Toggle*)  show_toggle_menu ;;
+  esac
+}
+
+show_capture_menu() {
+  local options="  Screenshot Full
+  Screenshot Area
+  Color Picker
+  Screen Record"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Capture")
+  
+  case "$choice" in
+    *Full*)
+      grim ~/Pictures/screenshots/$(date +%Y%m%d-%H%M%S).png && notify "Screenshot" "Saved"
+      ;;
+    *Area*)
+      grim -g "$(slurp)" ~/Pictures/screenshots/$(date +%Y%m%d-%H%M%S).png && notify "Screenshot" "Area saved"
+      ;;
+    *Color*)
+      hyprpicker -a && notify "Color Picker" "Color copied to clipboard"
+      ;;
+    *Record*)
+      "$SCRIPT_DIR/hyprvoid-screenrecord" 2>/dev/null || notify "Screen Record" "wf-recorder not installed"
+      ;;
+  esac
+}
+
+show_share_menu() {
+  local options="  Clipboard Text
+  File
+  Folder Path"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Share")
+  
+  case "$choice" in
+    *Clipboard*)
+      text=$(echo "" | dmenu "Enter text to copy")
+      if [[ -n "$text" ]]; then
+        echo -n "$text" | wl-copy && notify "Copied" "$text"
+      fi
+      ;;
+    *File*)
+      notify "Share File" "Use file manager to copy file path"
+      ;;
+    *Folder*)
+      notify "Share Folder" "Use file manager to copy folder path"
+      ;;
+  esac
+}
+
+show_toggle_menu() {
+  local options="󱄄  Screensaver/Idle
+󰔎  Nightlight
+󰍜  Top Bar"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Toggle")
+  
+  case "$choice" in
+    *Idle*)      "$SCRIPT_DIR/hyprvoid-toggle-idle" ;;
+    *Nightlight*) "$SCRIPT_DIR/hyprvoid-toggle-nightlight" ;;
+    *Bar*)       "$SCRIPT_DIR/hyprvoid-toggle-waybar" ;;
+  esac
+}
+
+# ========== STYLE MENU ==========
+show_style_menu() {
+  local options="󰸌  Theme
+  Background
+  Font"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Style")
+  
+  case "$choice" in
+    *Theme*)
+      theme_choice=$(echo -e "Dark\nLight\nToggle" | dmenu "Select Theme")
+      case "$theme_choice" in
+        Dark)   "$SCRIPT_DIR/hyprvoid-theme-set" dark ;;
+        Light)  "$SCRIPT_DIR/hyprvoid-theme-set" light ;;
+        Toggle) "$SCRIPT_DIR/hyprvoid-theme-set" toggle ;;
+      esac
+      ;;
+    *Background*)
+      "$SCRIPT_DIR/hyprvoid-theme-bg-next"
+      ;;
+    *Font*)
+      current_font=$(fc-match monospace | awk -F: '{print $1}')
+      notify "Font" "Current: $current_font - Change in settings"
+      ;;
+  esac
+}
+
+# ========== SETUP MENU ==========
+show_setup_menu() {
+  local options="  Audio
+  WiFi
+󰂯  Bluetooth
+󱐋  Power Profile
+󰍹  Monitors
+  Config Files"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Setup")
+  
+  case "$choice" in
+    *Audio*)
+      if command -v pavucontrol >/dev/null 2>&1; then
+        pavucontrol &
+      else
+        notify "Audio" "Install pavucontrol: sudo xbps-install -S pavucontrol"
+      fi
+      ;;
+    *WiFi*)
+      run_in_terminal "nmtui"
+      ;;
+    *Bluetooth*)
+      if command -v blueman-manager >/dev/null 2>&1; then
+        blueman-manager &
+      else
+        run_in_terminal "bluetoothctl"
+      fi
+      ;;
+    *Power*)
+      if command -v powerprofilesctl >/dev/null 2>&1; then
+        profile=$(powerprofilesctl list | dmenu "Power Profile")
+        [[ -n "$profile" ]] && powerprofilesctl set "$profile"
+      else
+        notify "Power" "Install power-profiles-daemon or tlp"
+      fi
+      ;;
+    *Monitors*)
+      if command -v wdisplays >/dev/null 2>&1; then
+        wdisplays &
+      else
+        run_in_terminal "hyprctl monitors"
+      fi
+      ;;
+    *Config*)
+      config=$(echo -e "hyprland.conf\nbindings.conf\nlooknfeel.conf" | dmenu "Edit Config")
+      [[ -n "$config" ]] && ${EDITOR:-nano} "$HOME/.config/hypr/$config"
+      ;;
+  esac
+}
+
+# ========== INSTALL MENU ==========
+show_install_menu() {
+  local options="󰣇  Package
+  Web App
+󰵮  Dev Environment"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Install")
+  
+  case "$choice" in
+    *Package*)
+      pkg=$(echo "" | dmenu "Package name to install")
+      if [[ -n "$pkg" ]] && confirm "Install $pkg?"; then
+        run_in_terminal "sudo xbps-install -S $pkg"
+      fi
+      ;;
+    *Web*)
+      notify "Web Apps" "Create .desktop files in ~/.local/share/applications/"
+      ;;
+    *Dev*)
+      env=$(echo -e "Node.js\nPython\nRust\nGo" | dmenu "Dev Environment")
+      case "$env" in
+        Node*) run_in_terminal "sudo xbps-install -S nodejs" ;;
+        Python*) run_in_terminal "sudo xbps-install -S python3 python3-pip" ;;
+        Rust*) run_in_terminal "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" ;;
+        Go*) run_in_terminal "sudo xbps-install -S go" ;;
+      esac
+      ;;
+  esac
+}
+
+# ========== REMOVE MENU ==========
+show_remove_menu() {
+  local options="󰣇  Package
+  Cleanup"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Remove")
+  
+  case "$choice" in
+    *Package*)
+      pkg=$(echo "" | dmenu "Package name to remove")
+      if [[ -n "$pkg" ]] && confirm "Remove $pkg?"; then
+        run_in_terminal "sudo xbps-remove -R $pkg"
+      fi
+      ;;
+    *Cleanup*)
+      if confirm "Remove orphaned packages?"; then
+        run_in_terminal "sudo xbps-remove -o"
+      fi
+      ;;
+  esac
+}
+
+# ========== UPDATE MENU ==========
+show_update_menu() {
+  local options="  System Update
+  Config Refresh
+  Restart Services"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "Update")
+  
+  case "$choice" in
+    *System*)
+      if confirm "Update system packages?"; then
+        run_in_terminal "sudo xbps-install -Syu"
+      fi
+      ;;
+    *Config*)
+      if confirm "Reload Hyprland config?"; then
+        hyprctl reload && notify "Config" "Reloaded"
+      fi
+      ;;
+    *Restart*)
+      service=$(echo -e "Waybar\nMako\nHyprpaper" | dmenu "Restart Service")
+      case "$service" in
+        Waybar) killall waybar; waybar & ;;
+        Mako) killall mako; mako & ;;
+        Hyprpaper) killall hyprpaper; hyprpaper & ;;
+      esac
+      ;;
+  esac
+}
+
+# ========== ABOUT MENU ==========
+show_about_menu() {
+  local info
+  info="HyprVoid - Hyprland for Void Linux
+
+$(uname -sr)
+Hyprland: $(hyprctl version | head -1)
+Shell: $SHELL
+
+Keybindings: SUPER+K
+Menu: SUPER+ALT+SPACE"
+  
+  notify "About HyprVoid" "$info"
+}
+
+# ========== SYSTEM MENU ==========
+show_system_menu() {
+  local options="  Lock
+󰤄  Suspend
+󰜉  Restart
+󰐥  Shutdown"
+  
+  local choice
+  choice=$(echo "$options" | dmenu "System")
+  
+  case "$choice" in
+    *Lock*)
+      if command -v hyprlock >/dev/null 2>&1; then
+        hyprlock
+      elif command -v gtklock >/dev/null 2>&1; then
+        gtklock
+      else
+        loginctl lock-session
+      fi
+      ;;
+    *Suspend*)
+      if confirm "Suspend system?"; then
+        systemctl suspend
+      fi
+      ;;
+    *Restart*)
+      if confirm "Restart system?"; then
+        systemctl reboot
+      fi
+      ;;
+    *Shutdown*)
+      if confirm "Shutdown system?"; then
+        systemctl poweroff
+      fi
+      ;;
+  esac
+}
+
+# Main entry point
+main() {
+  local menu="${1:-main}"
+  
+  case "$menu" in
+    apps)     show_apps_menu ;;
+    learn)    show_learn_menu ;;
+    trigger)  show_trigger_menu ;;
+    style)    show_style_menu ;;
+    setup)    show_setup_menu ;;
+    install)  show_install_menu ;;
+    remove)   show_remove_menu ;;
+    update)   show_update_menu ;;
+    about)    show_about_menu ;;
+    system)   show_system_menu ;;
+    *)        show_main_menu ;;
+  esac
+}
+
+main "$@"
