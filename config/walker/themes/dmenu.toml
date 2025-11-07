@@ -1,0 +1,58 @@
+# DMMenu-style theme for Walker
+# Minimalist centered layout like dmenu
+
+[ui.anchors]
+bottom = false
+left = true
+right = true
+top = false
+
+[ui.window]
+h_align = "center"
+v_align = "center"
+
+[ui.window.box]
+h_align = "center"
+width = 800
+orientation = "vertical"
+
+[ui.window.box.search]
+orientation = "horizontal"
+h_align = "fill"
+
+[ui.window.box.search.prompt]
+name = "prompt"
+icon = ""
+pixel_size = 16
+h_align = "center"
+v_align = "center"
+
+[ui.window.box.search.input]
+h_align = "fill"
+h_expand = true
+
+[ui.window.box.search.spinner]
+hide = true
+
+[ui.window.box.scroll]
+h_align = "fill"
+h_expand = true
+
+[ui.window.box.scroll.list]
+orientation = "vertical"
+spacing = 2
+max_height = 400
+
+[ui.window.box.scroll.list.item]
+h_align = "fill"
+orientation = "horizontal"
+
+[ui.window.box.scroll.list.item.icon]
+pixel_size = 18
+theme = ""
+
+[ui.window.box.scroll.list.item.text]
+h_align = "start"
+
+[ui.window.box.scroll.list.item.activation_label]
+hide = true

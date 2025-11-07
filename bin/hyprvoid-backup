@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# HyprVoid Backup - Create snapshot of current configuration
+set -euo pipefail
+
+BACKUP_DIR="${HOME}/.hyprvoid/backups"
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+BACKUP_FILE="${BACKUP_DIR}/${TIMESTAMP}-hyprvoid.tar.gz"
+
+echo "📦 Creating HyprVoid backup..."
+
+# Create temporary staging directory
+STAGING=$(mktemp -d)
+trap 'rm -rf "$STAGING"' EXIT
+
+# Copy configs to staging
+mkdir -p "${STAGING}/config"
+[[ -d "${HOME}/.config/hypr" ]] && cp -r "${HOME}/.config/hypr" "${STAGING}/config/"
+[[ -d "${HOME}/.config/walker" ]] && cp -r "${HOME}/.config/walker" "${STAGING}/config/"
+[[ -d "${HOME}/.config/wofi" ]] && cp -r "${HOME}/.config/wofi" "${STAGING}/config/"
+
+# Copy custom desktop entries if they exist
+if [[ -d "${HOME}/.local/share/applications" ]]; then
+  mkdir -p "${STAGING}/local/share"
+  # Only backup custom entries, not system-wide ones
+  find "${HOME}/.local/share/applications" -maxdepth 1 -name "*.desktop" -type f \
+    -exec cp {} "${STAGING}/local/share/" \; 2>/dev/null || true
+fi
+
+# Create the archive
+tar -czf "${BACKUP_FILE}" -C "${STAGING}" . 2>/dev/null
+
+# Verify the archive
+if tar -tzf "${BACKUP_FILE}" >/dev/null 2>&1; then
+  echo "✓ Backup created: ${BACKUP_FILE}"
+  echo "  Size: $(du -h "${BACKUP_FILE}" | cut -f1)"
+  echo "  Contents:"
+  tar -tzf "${BACKUP_FILE}" | head -10
+  [[ $(tar -tzf "${BACKUP_FILE}" | wc -l) -gt 10 ]] && echo "  ... ($(tar -tzf "${BACKUP_FILE}" | wc -l) total files)"
+else
+  echo "✗ Backup verification failed!"
+  exit 1
+fi
+
+# Keep only last 5 backups
+cd "${BACKUP_DIR}"
+ls -t *-hyprvoid.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm -f
+echo "  Kept last 5 backups, removed older ones"

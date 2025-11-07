@@ -6,18 +6,24 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/hyprvoid-lib"
 
+# Prevent multiple instances - if dmenu is already running with our prompt, kill it and exit
+if pgrep -f "dmenu.*HyprVoid Menu" >/dev/null 2>&1; then
+  pkill -f "dmenu.*HyprVoid Menu"
+  exit 0
+fi
+
 # Main menu options
 show_main_menu() {
   local options="󰀻  Apps
 󰧑  Learn
 󱓞  Trigger
-  Style
-  Setup
+󱓞  Style
+󱓞  Setup
 󰉉  Install
 󰭌  Remove
-  Update
-  About
-  System"
+󱓞  Update
+󱓞  About
+󱓞  System"
   
   local choice
   choice=$(echo "$options" | dmenu "HyprVoid Menu")
@@ -39,12 +45,12 @@ show_main_menu() {
 
 # ========== APPS MENU ==========
 show_apps_menu() {
-  if command -v walker >/dev/null 2>&1; then
-    walker
-  elif command -v wofi >/dev/null 2>&1; then
-    wofi --show drun
+  if command -v wofi >/dev/null 2>&1; then
+    wofi --show drun \
+      --conf "${HOME}/.config/wofi/config" \
+      --style "${HOME}/.config/wofi/style.css"
   else
-    notify "App Launcher" "No launcher found. Install walker or wofi"
+    notify "App Launcher" "No launcher found. Install wofi"
   fi
 }
 

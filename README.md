@@ -3,9 +3,9 @@
 > Hyprland-optimized desktop setup for Void Linux
 
 **HyprVoid** is a streamlined Hyprland configuration designed specifically for Void Linux with:
-- 🚀 **Walker** as primary app launcher (with Wofi fallback)
-- 🎨 **Catppuccin Mocha** theming
-- ⌨️ **Omarchy-style keybindings**
+- 🚀 **Wofi** as primary menu system with custom theme
+- 🎨 **HyprVoid Default** theming (sharp blue borders, dark aesthetic)
+- ⌨️ **Omarchy-inspired keybindings**
 - 🔊 **PipeWire + WirePlumber** audio
 - ⚡ **Fast and minimal** setup
 
@@ -30,22 +30,28 @@ After installation:
 
 ## Features
 
-### Walker App Launcher
-- Primary launcher with clean, fast UI
-- Automatic fallback to Wofi if Walker unavailable
-- Launch with `Super + Space`
+### Menu System
+- **Wofi-based** hierarchical menu system
+- Sharp blue borders with dark, semi-transparent background
+- Centered menus with icon support
+- Quick access to apps, system controls, and settings
+- Launch apps with `Super + Space`
+- Full menu with `Super + Alt + Space`
 
-### Catppuccin Mocha Theme
-- Consistent dark theme across all components
+### HyprVoid Default Theme
+- Clean, sharp aesthetic with no rounded corners
 - Blue accent colors (#89b4fa)
-- Blurred backgrounds and smooth animations
+- Semi-transparent backgrounds
+- Consistent styling across all menus
 
-### Omarchy Keybindings
+### Omarchy-Inspired Keybindings
 
 | Key | Action |
 |-----|--------|
-| `Super + Space` | App launcher (Walker) |
-| `Super + Alt + Space` | Actions menu (xbps package management) |
+| `Super + Space` | Launch applications (wofi) |
+| `Super + Alt + Space` | HyprVoid menu (Apps, Learn, Trigger, Style, Setup, etc.) |
+| `Super + Escape` | System menu (Lock, Logout, Reboot, Shutdown) |
+| `Super + K` | Show keybindings reference |
 | `Super + Return` | Terminal (Alacritty) |
 | `Super + W` | Close window |
 | `Super + F` | Fullscreen |
@@ -54,7 +60,8 @@ After installation:
 | `Super + Tab` | Next workspace |
 | `Alt + Tab` | Cycle windows |
 | `Print` | Screenshot |
-| `Super + Escape` | Exit Hyprland |
+
+See [docs/keybindings.md](docs/keybindings.md) for complete keybinding reference.
 
 ### Audio Setup
 - PipeWire + WirePlumber configured automatically
@@ -66,13 +73,10 @@ After installation:
 After installation, verify everything works:
 
 ```bash
-# Test launcher
-~/.local/bin/hyprvoid-menu-apps
+# Test menu system
+~/.local/bin/hyprvoid-menu
 
-# Test Walker directly
-walker
-
-# Test Wofi fallback
+# Test app launcher
 wofi --show drun
 
 # Test audio
@@ -85,10 +89,10 @@ alacritty
 
 ## Troubleshooting
 
-### Walker shows "--maxheight" error
-This has been fixed in the latest version. Update your scripts:
+### Menu doesn't appear styled
+Reload Hyprland configuration:
 ```bash
-cd hyprvoid && git pull && ./install.sh
+hyprctl reload
 ```
 
 ### Audio not working
@@ -111,24 +115,33 @@ echo $PATH | grep ".local/bin"
 
 - **WM**: Hyprland 0.49.0+
 - **Bar**: Waybar
-- **Launcher**: Walker (primary), Wofi (fallback)
+- **Launcher**: Wofi (with custom HyprVoid theme)
 - **Terminal**: Alacritty
 - **Notifications**: Mako
 - **Wallpaper**: hyprpaper
 - **Audio**: PipeWire + WirePlumber
-- **Theme**: Catppuccin Mocha
+- **Theme**: HyprVoid Default (sharp blue borders, dark aesthetic)
 
 ## Project Structure
 
 ```
 hyprvoid/
 ├── install.sh              # Main installer
-├── test.sh                 # Diagnostic tool
-├── fix.sh                  # Hyprland fixes
-└── bin/
-    ├── hyprvoid-menu-apps      # App launcher script
-    └── hyprvoid-menu-actions   # xbps package manager menu
+├── bin/
+│   ├── hyprvoid-menu       # Main hierarchical menu
+│   ├── hyprvoid-lib        # Shared utilities
+│   └── hyprvoid-*          # Various system scripts
+├── config/
+│   ├── bindings.conf       # Hyprland keybindings
+│   ├── wofi-style-*.css    # Wofi theme templates
+│   └── *.conf              # Hyprland configs
+└── docs/
+    ├── menu-system.md      # Menu system documentation
+    ├── keybindings.md      # Keybinding reference
+    └── project-structure.md # Project overview
 ```
+
+See [docs/menu-system.md](docs/menu-system.md) for detailed menu documentation.
 
 ## License
 
@@ -138,6 +151,5 @@ MIT
 
 - Inspired by [Voidance](https://github.com/stolenducks/voidance)
 - [Hyprland](https://hyprland.org/)
-- [Walker](https://github.com/abenz1267/walker)
-- [Catppuccin](https://github.com/catppuccin/catppuccin)
+- [Wofi](https://hg.sr.ht/~scoopta/wofi)
 - [Void Linux](https://voidlinux.org/)
