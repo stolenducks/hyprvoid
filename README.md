@@ -89,26 +89,32 @@ alacritty
 
 ## Troubleshooting
 
+**For comprehensive troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)**
+
+Common quick fixes:
+
 ### Menu doesn't appear styled
-Reload Hyprland configuration:
 ```bash
 hyprctl reload
 ```
 
+### Cursor reverts to default
+```bash
+hyprctl setcursor Bibata-Modern-Classic 24
+```
+
+### Wallpaper disappears
+```bash
+pkill hyprpaper && hyprpaper &
+```
+
+### Power menu doesn't work
+Verify using `loginctl` (not `systemctl`) - see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md#power-management-issues)
+
 ### Audio not working
-Start audio services manually (temporary fix):
 ```bash
 pipewire &
 wireplumber &
-```
-
-Then log out and back in for permanent fix.
-
-### Launcher doesn't open
-Check if scripts are executable and in PATH:
-```bash
-ls -la ~/.local/bin/hyprvoid-*
-echo $PATH | grep ".local/bin"
 ```
 
 ## Components

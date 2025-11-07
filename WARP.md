@@ -163,12 +163,75 @@ Bad examples:
 6. ✅ Update documentation if you add features
 7. ✅ Use 2 spaces after icons consistently
 
+## System Customization History & Critical Notes
+
+### Cursor Theme Setup (2025-11-07)
+**CRITICAL: Bibata-Modern-Classic cursor is installed and configured**
+
+**Location**: `~/.local/share/icons/Bibata-Modern-Classic/`
+
+**Configuration files**:
+1. `~/.config/hypr/hyprland.conf` - Line 8: `env = XCURSOR_THEME,Bibata-Modern-Classic`
+2. `~/.config/hypr/autostart.conf` - Line 33: `exec-once = hyprctl setcursor Bibata-Modern-Classic 24`
+3. `~/.config/gtk-3.0/settings.ini` - `gtk-cursor-theme-name=Bibata-Modern-Classic`
+
+**To apply cursor immediately**: `hyprctl setcursor Bibata-Modern-Classic 24`
+
+### Wallpaper Setup (2025-11-07)
+**CRITICAL: Custom wallpaper configured with hyprpaper**
+
+**Active wallpaper**: `~/Pictures/wallpapers/fabrizio-conti-z2BCD8Bgd9M-unsplash.jpg`
+
+**Configuration**:
+- `~/.config/hypr/hyprpaper.conf` - Contains preload and wallpaper directives
+- `~/.config/hypr/autostart.conf` - Line 14: `exec-once = hyprpaper` (ENABLED)
+- `~/.config/hypr/autostart.conf` - Line 30: Theme wallpaper script DISABLED (was overriding custom wallpaper)
+
+**IMPORTANT**: The `hyprvoid-theme-bg-next` script is disabled to prevent it from overriding custom wallpapers.
+
+### Power Management Fix (2025-11-07)
+**CRITICAL: Void Linux uses elogind/loginctl, NOT systemd**
+
+**Problem**: System menu Suspend/Restart/Shutdown were failing because script used `systemctl` commands
+
+**Solution**: Updated `~/hyprvoid/bin/hyprvoid-menu` (lines 365-379) to use:
+- **Suspend**: `loginctl suspend` (no sudo required)
+- **Restart**: `loginctl reboot` (no sudo required)
+- **Shutdown**: `loginctl poweroff` (no sudo required)
+
+**Why this matters**:
+- Void Linux does NOT have `systemd` or `systemctl`
+- Void uses **runit** as init system and **elogind** for session management
+- `loginctl` is part of elogind and works without sudo permissions
+- Commands like `sudo reboot` require password prompt which breaks menu system
+
+**File location**: `/home/stolenducks/hyprvoid/bin/hyprvoid-menu`
+**Symlink**: `~/.local/bin/hyprvoid-menu` → `/home/stolenducks/hyprvoid/bin/hyprvoid-menu`
+
+**Testing power management**:
+```bash
+# Verify loginctl is available
+which loginctl
+loginctl --help | grep -E "suspend|reboot|poweroff"
+
+# Test system menu
+hyprvoid-menu system
+```
+
+### Waybar Power Icon (2025-11-07)
+**Configuration**: `~/.config/waybar/config.jsonc` line 72: `"on-click": "hyprvoid-menu system"`
+
+**To restart waybar**: `pkill waybar && waybar &`
+
 ## Current System State
 
 - **System**: Working beautifully ✅
 - **Menus**: Styled wofi with blue borders
-- **Keybindings**: SUPER+SPACE (apps), SUPER+ALT+SPACE (main menu)
+- **Keybindings**: SUPER+SPACE (apps), SUPER+ALT+SPACE (main menu), SUPER+ESC (system menu)
 - **Theme**: HyprVoid Default (sharp blue borders, no rounding)
+- **Cursor**: Bibata-Modern-Classic (installed and configured)
+- **Wallpaper**: Custom image via hyprpaper
+- **Power Management**: loginctl-based (Void Linux compatible)
 - **Scripts**: 11 active in `bin/`
 - **Last verified**: 2025-11-07
 

@@ -15,15 +15,15 @@ fi
 # Main menu options
 show_main_menu() {
   local options="󰀻  Apps
-󰧑  Learn
-󱓞  Trigger
-󱓞  Style
-󱓞  Setup
-󰉉  Install
-󰭌  Remove
-󱓞  Update
-󱓞  About
-󱓞  System"
+󰓑  Learn
+󰄈  Trigger
+󰜌  Style
+󰂓  Setup
+󰁉  Install
+󰬌  Remove
+󰆞  Update
+󰃄  About
+󰐥  System"
   
   local choice
   choice=$(echo "$options" | dmenu "HyprVoid Menu")
@@ -56,10 +56,10 @@ show_apps_menu() {
 
 # ========== LEARN MENU ==========
 show_learn_menu() {
-  local options="  Keybindings
+  local options="󰌌  Keybindings
   Hyprland Wiki
 󰣇  Void Linux Docs
-󱆃  Bash Cheatsheet"
+  Bash Cheatsheet"
   
   local choice
   choice=$(echo "$options" | dmenu "Learn")
@@ -83,8 +83,8 @@ show_learn_menu() {
 # ========== TRIGGER MENU ==========
 show_trigger_menu() {
   local options="  Capture
-  Share
-󰔎  Toggle"
+󰒊  Share
+󰔡  Toggle"
   
   local choice
   choice=$(echo "$options" | dmenu "Trigger")
@@ -99,7 +99,7 @@ show_trigger_menu() {
 show_capture_menu() {
   local options="  Screenshot Full
   Screenshot Area
-  Color Picker
+󰏘  Color Picker
   Screen Record"
   
   local choice
@@ -123,8 +123,8 @@ show_capture_menu() {
 
 show_share_menu() {
   local options="  Clipboard Text
-  File
-  Folder Path"
+󰈔  File
+󰉋  Folder Path"
   
   local choice
   choice=$(echo "$options" | dmenu "Share")
@@ -146,8 +146,8 @@ show_share_menu() {
 }
 
 show_toggle_menu() {
-  local options="󱄄  Screensaver/Idle
-󰔎  Nightlight
+  local options="󰒳  Screensaver/Idle
+󰛨  Nightlight
 󰍜  Top Bar"
   
   local choice
@@ -162,8 +162,8 @@ show_toggle_menu() {
 
 # ========== STYLE MENU ==========
 show_style_menu() {
-  local options="󰸌  Theme
-  Background
+  local options="󰏘  Theme
+󰸉  Background
   Font"
   
   local choice
@@ -190,12 +190,12 @@ show_style_menu() {
 
 # ========== SETUP MENU ==========
 show_setup_menu() {
-  local options="  Audio
-  WiFi
+  local options="󰕾  Audio
+󰖩  WiFi
 󰂯  Bluetooth
 󱐋  Power Profile
 󰍹  Monitors
-  Config Files"
+󰒓  Config Files"
   
   local choice
   choice=$(echo "$options" | dmenu "Setup")
@@ -242,9 +242,9 @@ show_setup_menu() {
 
 # ========== INSTALL MENU ==========
 show_install_menu() {
-  local options="󰣇  Package
-  Web App
-󰵮  Dev Environment"
+  local options="󰏖  Package
+󰖟  Web App
+󰅨  Dev Environment"
   
   local choice
   choice=$(echo "$options" | dmenu "Install")
@@ -273,8 +273,8 @@ show_install_menu() {
 
 # ========== REMOVE MENU ==========
 show_remove_menu() {
-  local options="󰣇  Package
-  Cleanup"
+  local options="󰆴  Package
+󰃨  Cleanup"
   
   local choice
   choice=$(echo "$options" | dmenu "Remove")
@@ -296,9 +296,9 @@ show_remove_menu() {
 
 # ========== UPDATE MENU ==========
 show_update_menu() {
-  local options="  System Update
-  Config Refresh
-  Restart Services"
+  local options="󰚰  System Update
+󰑓  Config Refresh
+󰑐  Restart Services"
   
   local choice
   choice=$(echo "$options" | dmenu "Update")
@@ -364,17 +364,17 @@ show_system_menu() {
       ;;
     *Suspend*)
       if confirm "Suspend system?"; then
-        systemctl suspend
+        loginctl suspend
       fi
       ;;
     *Restart*)
       if confirm "Restart system?"; then
-        systemctl reboot
+        loginctl reboot
       fi
       ;;
     *Shutdown*)
       if confirm "Shutdown system?"; then
-        systemctl poweroff
+        loginctl poweroff
       fi
       ;;
   esac
