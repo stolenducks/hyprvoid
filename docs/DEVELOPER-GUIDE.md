@@ -74,7 +74,7 @@ cat docs/DEVELOPER-GUIDE.md      # This file
 ### Key Files to Know
 - `bin/hyprvoid-menu` - Main menu system (400 lines)
 - `bin/hyprvoid-lib` - Shared utilities
-- `config/bindings.conf` - All keybindings
+- `config/keybindings.conf` - All keybindings
 - `config/wofi-style-dark.css` - Menu styling
 
 ---
@@ -762,7 +762,7 @@ cp bin/hyprvoid-new-feature ~/.local/bin/
 
 **5. Add keybinding (if needed):**
 ```bash
-# Edit config/bindings.conf
+# Edit config/keybindings.conf
 bind = $mod, X, exec, ~/.local/bin/hyprvoid-new-feature  #desc: New feature
 ```
 
@@ -847,7 +847,7 @@ cp bin/hyprvoid-menu ~/.local/bin/
 hyprctl reload
 
 # Check which file Hyprland is using
-ls -la ~/.config/hypr/bindings.conf
+ls -la ~/.config/hypr/keybindings.conf
 ```
 
 ### Multiple menu instances open
@@ -916,7 +916,7 @@ tail -f ~/.cache/hyprvoid/logs/*.log
 ### Key Files
 - `bin/hyprvoid-menu` - All menus
 - `bin/hyprvoid-lib` - Shared utilities
-- `config/bindings.conf` - Keybindings
+- `config/keybindings.conf` - Keybindings
 - `~/.config/wofi/style.css` - Menu styling
 
 ### Important Patterns

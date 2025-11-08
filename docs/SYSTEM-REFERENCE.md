@@ -60,7 +60,7 @@ This document provides a complete technical reference for the HyprVoid system. R
 ```
 User Input (Keyboard)
        ↓
-Hyprland (bindings.conf)
+Hyprland (keybindings.conf)
        ↓
 hyprvoid-* scripts ← hyprvoid-lib (shared utilities)
        ↓
@@ -94,7 +94,7 @@ hyprvoid/
 │
 ├── config/                       # Configuration templates
 │   ├── autostart.conf            # Programs to start with Hyprland
-│   ├── bindings.conf             # ⭐ Keybindings (synced from ~/.config)
+│   ├── keybindings.conf             # ⭐ Keybindings (synced from ~/.config)
 │   ├── hyprland.conf             # Main Hyprland config
 │   ├── looknfeel-dark.conf       # Dark theme settings
 │   ├── looknfeel-light.conf      # Light theme settings
@@ -129,11 +129,11 @@ hyprvoid/
 These are actively called by keybindings or other scripts:
 
 1. **hyprvoid-menu** - Main menu system
-   - Called by: SUPER+ALT+SPACE (bindings.conf:11)
+   - Called by: SUPER+ALT+SPACE (keybindings.conf:11)
    - Provides: Apps, Learn, Trigger, Style, Setup, Install, Remove, Update, About, System menus
 
 2. **hyprvoid-menu-keybindings** - Keybinding reference
-   - Called by: SUPER+K (bindings.conf:13)
+   - Called by: SUPER+K (keybindings.conf:13)
    - Displays: Formatted keybinding list
 
 3. **hyprvoid-lib** - Shared utilities
@@ -145,27 +145,27 @@ These are actively called by keybindings or other scripts:
    - Switches between dark/light themes
 
 5. **hyprvoid-theme-bg-next** - Background cycler
-   - Called by: SUPER+CTRL+SPACE (bindings.conf:27)
+   - Called by: SUPER+CTRL+SPACE (keybindings.conf:27)
    - Cycles through wallpapers
 
 6. **hyprvoid-toggle-waybar** - Bar toggle
-   - Called by: SUPER+SHIFT+SPACE (bindings.conf:26)
+   - Called by: SUPER+SHIFT+SPACE (keybindings.conf:26)
    - Shows/hides top bar
 
 7. **hyprvoid-toggle-gaps** - Gaps toggle
-   - Called by: SUPER+SHIFT+BACKSPACE (bindings.conf:30)
+   - Called by: SUPER+SHIFT+BACKSPACE (keybindings.conf:30)
    - Toggles workspace gaps
 
 8. **hyprvoid-toggle-idle** - Idle toggle
-   - Called by: SUPER+CTRL+I (bindings.conf:40)
+   - Called by: SUPER+CTRL+I (keybindings.conf:40)
    - Toggles screen lock/idle
 
 9. **hyprvoid-toggle-nightlight** - Nightlight toggle
-   - Called by: SUPER+CTRL+N (bindings.conf:41)
+   - Called by: SUPER+CTRL+N (keybindings.conf:41)
    - Toggles blue light filter
 
 10. **hyprvoid-screenrecord** - Screen recorder
-    - Called by: CTRL+PRINT (bindings.conf:48)
+    - Called by: CTRL+PRINT (keybindings.conf:48)
     - Records screen with wf-recorder
 
 11. **hyprvoid-warp-update** - Warp Terminal updater
@@ -200,8 +200,8 @@ Key sections:
 - Animation definitions
 - Layout settings
 
-#### bindings.conf
-**Location**: `config/bindings.conf` → `~/.config/hypr/bindings.conf`  
+#### keybindings.conf
+**Location**: `config/keybindings.conf` → `~/.config/hypr/keybindings.conf`  
 **Purpose**: ALL keybindings  
 **Status**: ACTIVE (synced from working ~/.config)
 
@@ -339,7 +339,7 @@ These are NOT being used.
 
 **How it's called**:
 ```bash
-# SUPER+SPACE (bindings.conf:9)
+# SUPER+SPACE (keybindings.conf:9)
 wofi --show drun \
   --conf "${HOME}/.config/wofi/config" \
   --style "${HOME}/.config/wofi/style.css"
@@ -356,7 +356,7 @@ wofi --show drun \
 
 **How it's called**:
 ```bash
-# SUPER+ALT+SPACE (bindings.conf:11)
+# SUPER+ALT+SPACE (keybindings.conf:11)
 ~/.local/bin/hyprvoid-menu
 ```
 
@@ -509,7 +509,7 @@ Repository: /home/stolenducks/hyprvoid/
               ↓ install.sh
 User Config: ~/.config/hypr/
                 ├── hyprland.conf
-                ├── bindings.conf
+                ├── keybindings.conf
                 ├── autostart.conf
                 ├── looknfeel.conf
                 ├── looknfeel-dark.conf
@@ -607,7 +607,7 @@ HyprVoid uses a symlink-based theme system (Omarchy-inspired):
 - Hyprland configs (all .conf files in ~/.config/hypr/)
 - wofi-style-dark.css (template for ~/.config/wofi/style.css)
 - All hyprvoid-* scripts except backup/restore/symlink
-- Keybindings in bindings.conf
+- Keybindings in keybindings.conf
 
 ### UNUSED ⚠️
 - Walker (installed but not called)

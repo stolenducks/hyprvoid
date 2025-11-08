@@ -157,7 +157,7 @@ The `dmenu()` function automatically detects and uses the best available launche
 - Check keybindings: `hyprctl binds | grep SPACE`
 
 ### Wrong menu opening
-- Verify keybindings in `~/.config/hypr/bindings.conf`
+- Verify keybindings in `~/.config/hypr/keybindings.conf`
 - Reload config: `hyprctl reload`
 
 ## Development
@@ -215,7 +215,7 @@ show_new_menu() {
 - `bin/hyprvoid-menu` - Main menu script
 - `bin/hyprvoid-lib` - Shared utilities
 - `bin/hyprvoid-menu-keybindings` - Keybinding display
-- `config/bindings.conf` - Hyprland keybindings
+- `config/keybindings.conf` - Hyprland keybindings
 - `config/wofi-style-dark.css` - Dark theme template
 - `config/wofi-style-light.css` - Light theme template
 - `docs/keybindings.md` - Keybinding reference

@@ -41,7 +41,7 @@ When working on HyprVoid, you MUST reference these documents in this order:
 - All files in `bin/` (11 scripts)
 - All files in `config/*.conf`
 - `config/wofi-style-dark.css` and `config/wofi-style-light.css`
-- Keybindings in `config/bindings.conf`
+- Keybindings in `config/keybindings.conf`
 
 **UNUSED** ⚠️:
 - `config/walker/*` - Reference only, NOT active
@@ -240,7 +240,7 @@ hyprvoid-menu system
 ### Essential Files
 - `bin/hyprvoid-menu` - All menu functions
 - `bin/hyprvoid-lib` - Shared utilities (dmenu(), notify(), etc.)
-- `config/bindings.conf` - All keybindings
+- `config/keybindings.conf` - All keybindings
 - `config/wofi-style-dark.css` - Menu styling template
 - `~/.config/wofi/style.css` - Active menu styling
 

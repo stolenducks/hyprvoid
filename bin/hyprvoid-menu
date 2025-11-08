@@ -255,7 +255,7 @@ show_setup_menu() {
       fi
       ;;
     *Config*)
-      config=$(echo -e "hyprland.conf\nbindings.conf\nlooknfeel.conf" | dmenu "Edit Config")
+      config=$(echo -e "hyprland.conf\nkeybindings.conf\nlooknfeel.conf\nautostart.conf" | dmenu "Edit Config")
       [[ -n "$config" ]] && ${EDITOR:-nano} "$HOME/.config/hypr/$config"
       ;;
   esac
@@ -361,6 +361,52 @@ Menu: SUPER+ALT+SPACE"
   notify "About HyprVoid" "$info"
 }
 
+# ========== CLIPBOARD HISTORY MENU ==========
+show_clipboard_menu() {
+  # 1) Toggle behavior: close if already open
+  if pgrep -f "wofi.*Clipboard History" >/dev/null 2>&1; then
+    pkill -f "wofi.*Clipboard History"
+    exit 0
+  fi
+
+  # 2) Build list (id + snippet), limit for speed
+  local history
+  history="$(cliphist list | head -n 200)"
+
+  # 3) Prepend actions
+  local options="󰅌  Close
+󰧻  Clear history"
+  if [ -n "$history" ]; then
+    options="$options
+$history"
+  fi
+
+  # 4) Show menu via dmenu() (wofi styled by hyprvoid-lib)
+  local choice
+  choice="$(echo "$options" | dmenu "Clipboard History")"
+
+  # 5) Handle selection
+  case "$choice" in
+    "󰅌  Close"|"" )
+      exit 0
+      ;;
+    "󰧻  Clear history")
+      cliphist wipe
+      notify "Clipboard history cleared"
+      ;;
+    *)
+      # Expect first token is the cliphist entry id
+      local id
+      id="$(echo "$choice" | awk '{print $1}')"
+      if printf "%s" "$id" | grep -qE '^[0-9]+$'; then
+        # Restore to clipboard, then paste immediately
+        cliphist decode "$id" | wl-copy
+        wl-paste --no-newline | wtype -s 0
+      fi
+      ;;
+  esac
+}
+
 # ========== SYSTEM MENU ==========
 show_system_menu() {
   # Prevent multiple instances
@@ -406,17 +452,18 @@ main() {
   local menu="${1:-main}"
   
   case "$menu" in
-    apps)     show_apps_menu ;;
-    learn)    show_learn_menu ;;
-    trigger)  show_trigger_menu ;;
-    style)    show_style_menu ;;
-    setup)    show_setup_menu ;;
-    install)  show_install_menu ;;
-    remove)   show_remove_menu ;;
-    update)   show_update_menu ;;
-    about)    show_about_menu ;;
-    system)   show_system_menu ;;
-    *)        show_main_menu ;;
+    apps)      show_apps_menu ;;
+    learn)     show_learn_menu ;;
+    trigger)   show_trigger_menu ;;
+    style)     show_style_menu ;;
+    setup)     show_setup_menu ;;
+    install)   show_install_menu ;;
+    remove)    show_remove_menu ;;
+    update)    show_update_menu ;;
+    about)     show_about_menu ;;
+    system)    show_system_menu ;;
+    clipboard) show_clipboard_menu ;;
+    *)         show_main_menu ;;
   esac
 }
 

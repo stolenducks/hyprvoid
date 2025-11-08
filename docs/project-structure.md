@@ -31,7 +31,7 @@ hyprvoid/
 ├── config/                   # Configuration templates
 │   ├── hypr/                 # Hyprland configuration
 │   │   ├── hyprland.conf     # Main Hyprland config
-│   │   ├── bindings.conf     # Keybindings
+│   │   ├── keybindings.conf     # Keybindings
 │   │   ├── autostart.conf    # Autostart programs
 │   │   ├── looknfeel*.conf   # Theme configurations
 │   │   └── windowrules.conf  # Window rules
@@ -58,7 +58,7 @@ hyprvoid/
 ### Local Paths (Runtime)
 - `~/.config/hypr/` - Hyprland configuration
   - `hyprland.conf` - Main config
-  - `bindings.conf` - Keybindings
+  - `keybindings.conf` - Keybindings
   - `looknfeel.conf` - Current theme (symlink)
 - `~/.config/wofi/` - Wofi configuration
   - `config` - Wofi settings (size, position, etc.)
@@ -121,7 +121,7 @@ To make changes permanent in the repo:
 ### Files Using Walker:
 - `bin/hyprvoid-menu-apps` - Will be renamed to hyprvoid-launch-walker
 - `bin/hyprvoid-menu` - Uses walker in Apps menu
-- `config/bindings.conf` - Keybindings for walker
+- `config/keybindings.conf` - Keybindings for walker
 - `install.sh` - Walker installation logic
 
 ### No Path Conflicts:

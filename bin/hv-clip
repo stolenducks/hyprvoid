@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# HyprVoid Clipboard - Universal copy/paste/cut for Wayland
+# Uses wl-clipboard + wtype for reliable paste across all applications
+
+set -euo pipefail
+
+app="HyprVoid Clipboard"
+
+notify() {
+  command -v notify-send >/dev/null 2>&1 && notify-send -a "$app" "$@"
+}
+
+have_primary() {
+  timeout 0.1 wl-paste --primary --no-newline >/dev/null 2>&1
+}
+
+have_clipboard() {
+  timeout 0.1 wl-paste --no-newline >/dev/null 2>&1
+}
+
+case "${1-}" in
+  copy)
+    if have_primary; then
+      wl-paste --primary --no-newline | wl-copy
+      notify "Copied selection to clipboard"
+    else
+      # No primary selection: leave clipboard as-is but inform user
+      notify "No selection detected (clipboard unchanged)"
+    fi
+    ;;
+  paste)
+    if have_clipboard; then
+      # Paste from CLIPBOARD universally by typing its contents
+      wl-paste --no-newline | wtype -s 0
+    else
+      notify "Clipboard is empty"
+    fi
+    ;;
+  cut)
+    if have_primary; then
+      wl-paste --primary --no-newline | wl-copy
+      # Delete current selection in most editable fields
+      wtype -k delete || true
+      notify "Cut selection to clipboard"
+    else
+      notify "No selection to cut"
+    fi
+    ;;
+  *)
+    echo "Usage: hv-clip {copy|paste|cut}" >&2
+    exit 1
+    ;;
+esac

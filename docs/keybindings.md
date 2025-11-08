@@ -16,11 +16,23 @@ Complete keyboard shortcut reference for HyprVoid.
 
 ## Complete Keybinding List
 
+### Clipboard (Omarchy-style)
+
+Universal copy/paste keybindings that work across all applications. The commands send standardized X11 signals (`CTRL+Insert`, `SHIFT+Insert`) which are recognized by most Linux apps.
+
+|| Keybinding | Action | Description |
+||------------|--------|-------------|
+|| `SUPER + C` | Copy | Copies selection (sends CTRL+Insert) |
+|| `SUPER + V` | Paste | Pastes from clipboard (sends SHIFT+Insert) |
+|| `SUPER + X` | Cut | Cuts selection (sends CTRL+X) |
+
+**Terminal (Ghostty)**: You can also use `CTRL+Insert`, `SHIFT+Insert`, `CTRL+SHIFT+C`, and `CTRL+SHIFT+V` directly in the terminal.
+
 ### Menus & Launchers
 
-| Keybinding | Action | Description |
-|------------|--------|-------------|
-| `SUPER + SPACE` | Launch Apps | Opens wofi application launcher |
+|| Keybinding | Action | Description |
+||------------|--------|-------------|
+|| `SUPER + SPACE` | Launch Apps | Opens wofi application launcher |
 | `SUPER + ALT + SPACE` | HyprVoid Menu | Opens main hierarchical menu |
 | `SUPER + ESCAPE` | System Menu | Power options (lock, logout, reboot, shutdown) |
 | `SUPER + K` | Keybindings | Shows this keybinding reference |
@@ -194,9 +206,9 @@ Complete keyboard shortcut reference for HyprVoid.
 
 ## Customization
 
-All keybindings are defined in `~/.config/hypr/bindings.conf`. To customize:
+All keybindings are defined in `~/.config/hypr/keybindings.conf`. To customize:
 
-1. Edit the file: `nano ~/.config/hypr/bindings.conf`
+1. Edit the file: `nano ~/.config/hypr/keybindings.conf`
 2. Modify or add bindings following the format:
    ```
    bind = MODS, KEY, dispatcher, params

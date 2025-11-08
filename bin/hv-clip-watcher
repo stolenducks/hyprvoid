@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# HyprVoid Clipboard Watcher - Debounced to prevent keystroke pollution
+# Only stores clipboard entries that remain stable for at least 1 second
+
+set -euo pipefail
+
+DEBOUNCE_TIME=1  # seconds
+last_content=""
+last_hash=""
+
+while true; do
+  # Get current clipboard content
+  current_content=$(wl-paste --no-newline 2>/dev/null || echo "")
+  
+  # Skip if clipboard is empty
+  if [[ -z "$current_content" ]]; then
+    sleep 0.5
+    continue
+  fi
+  
+  # Generate hash of content
+  current_hash=$(echo -n "$current_content" | sha256sum | awk '{print $1}')
+  
+  # If content changed, wait for debounce period
+  if [[ "$current_hash" != "$last_hash" ]]; then
+    last_hash="$current_hash"
+    sleep "$DEBOUNCE_TIME"
+    
+    # Check if content is still the same after debounce
+    verify_content=$(wl-paste --no-newline 2>/dev/null || echo "")
+    verify_hash=$(echo -n "$verify_content" | sha256sum | awk '{print $1}')
+    
+    # Only store if content remained stable
+    if [[ "$verify_hash" == "$current_hash" ]] && [[ "$verify_content" != "$last_content" ]]; then
+      echo -n "$verify_content" | cliphist store
+      last_content="$verify_content"
+    fi
+  fi
+  
+  sleep 0.5
+done

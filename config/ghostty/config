@@ -1,0 +1,20 @@
+# === HyprVoid Ghostty Configuration ===
+# Minimal working setup
+
+# Font
+font-family = CaskaydiaMono Nerd Font
+font-size = 12
+
+# Window
+window-padding-x = 8
+window-padding-y = 8
+
+# Cursor
+cursor-style = block
+cursor-style-blink = false
+
+# Shell integration disabled to avoid conflicts
+
+# Note: Copy/paste keybindings are managed system-wide via Hyprland
+# Ghostty uses native terminal copy/paste defaults (CTRL+SHIFT+C/V)
+# Hyprland sends SUPER+C/V as CTRL+Insert/SHIFT+Insert which Ghostty handles automatically

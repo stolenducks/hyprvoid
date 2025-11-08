@@ -6,15 +6,15 @@ This document explains what each script in `bin/` does and whether it's needed.
 
 ### Core Menu System
 - **hyprvoid-menu** - Main hierarchical menu (SUPER+ALT+SPACE)
-  - Used by: bindings.conf line 11
+  - Used by: keybindings.conf line 11
   - Status: **KEEP** - Core functionality
 
 - **hyprvoid-menu-keybindings** - Displays keybinding reference (SUPER+K)
-  - Used by: bindings.conf line 13
+  - Used by: keybindings.conf line 13
   - Status: **KEEP** - Core functionality
 
 - **hyprvoid-launch-walker** - App launcher with wofi fallback (SUPER+SPACE)
-  - Used by: bindings.conf line 9
+  - Used by: keybindings.conf line 9
   - Status: **KEEP** - Actually used and has proper fallback
 
 - **hyprvoid-lib** - Shared utilities for all scripts
@@ -27,29 +27,29 @@ This document explains what each script in `bin/` does and whether it's needed.
   - Status: **KEEP** - Active feature
 
 - **hyprvoid-theme-bg-next** - Cycle backgrounds (SUPER+CTRL+SPACE)
-  - Used by: bindings.conf line 27
+  - Used by: keybindings.conf line 27
   - Status: **KEEP** - Active feature
 
 - **hyprvoid-toggle-waybar** - Toggle top bar (SUPER+SHIFT+SPACE)
-  - Used by: bindings.conf line 26
+  - Used by: keybindings.conf line 26
   - Status: **KEEP** - Active feature
 
 - **hyprvoid-toggle-gaps** - Toggle workspace gaps (SUPER+SHIFT+BACKSPACE)
-  - Used by: bindings.conf line 30
+  - Used by: keybindings.conf line 30
   - Status: **KEEP** - Active feature
 
 ### System Toggles
 - **hyprvoid-toggle-idle** - Toggle screen lock (SUPER+CTRL+I)
-  - Used by: bindings.conf line 40
+  - Used by: keybindings.conf line 40
   - Status: **KEEP** - Active feature
 
 - **hyprvoid-toggle-nightlight** - Toggle nightlight (SUPER+CTRL+N)
-  - Used by: bindings.conf line 41
+  - Used by: keybindings.conf line 41
   - Status: **KEEP** - Active feature
 
 ### Media
 - **hyprvoid-screenrecord** - Screen recording toggle (CTRL+PRINT)
-  - Used by: bindings.conf line 48
+  - Used by: keybindings.conf line 48
   - Status: **KEEP** - Active feature
 
 ## ❓ QUESTIONABLE SCRIPTS (Not directly used)

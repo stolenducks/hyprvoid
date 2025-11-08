@@ -191,7 +191,7 @@ HyprVoid uses a modular configuration structure:
 ```
 ~/.config/hypr/
 ├── hyprland.conf          # Main config (sources others)
-├── bindings.conf          # All keybindings
+├── keybindings.conf          # All keybindings
 ├── looknfeel.conf         # Theme pointer
 ├── looknfeel-dark.conf    # Catppuccin Mocha
 ├── looknfeel-light.conf   # Catppuccin Latte
@@ -200,7 +200,7 @@ HyprVoid uses a modular configuration structure:
 
 ### Edit configs:
 - `SUPER + ALT + SPACE` → Setup → Config Files
-- Or manually: `$EDITOR ~/.config/hypr/bindings.conf`
+- Or manually: `$EDITOR ~/.config/hypr/keybindings.conf`
 
 ## Dependencies
 
@@ -229,7 +229,7 @@ HyprVoid uses a modular configuration structure:
 ## Customization
 
 ### Add custom keybindings:
-Edit `~/.config/hypr/bindings.conf` and add:
+Edit `~/.config/hypr/keybindings.conf` and add:
 ```
 bind = $mod SHIFT, X, exec, my-command  #desc: My custom command
 ```
@@ -292,7 +292,7 @@ hyprvoid/
 │   └── hyprvoid-*          # Helper scripts
 ├── config/                 # Configuration templates
 │   ├── hyprland.conf
-│   ├── bindings.conf
+│   ├── keybindings.conf
 │   ├── looknfeel-*.conf
 │   ├── autostart.conf
 │   └── wofi-style-*.css
