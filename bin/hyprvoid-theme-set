@@ -34,6 +34,16 @@ log "Switching to theme: $THEME_NAME"
 mkdir -p "$(dirname "$CURRENT_THEME_LINK")"
 ln -sfn "$THEME_PATH" "$CURRENT_THEME_LINK"
 
+# Set GTK color scheme based on theme
+case "$THEME_NAME" in
+  rose-pine-dawn)
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-light' 2>/dev/null || true
+    ;;
+  catppuccin-mocha|osaka-jade)
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+    ;;
+esac
+
 # Apply theme to various applications
 "$SCRIPT_DIR/hyprvoid-theme-set-terminal" || true
 "$SCRIPT_DIR/hyprvoid-theme-set-gtk" || true

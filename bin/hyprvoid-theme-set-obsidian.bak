@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# HyprVoid Obsidian Theme Setter
+# Sets Obsidian theme from current HyprVoid theme
+
+set -Eeuo pipefail
+
+# Get current hyprvoid theme name
+CURRENT_THEME_LINK="$HOME/.config/hyprvoid/current/theme"
+if [[ -L "$CURRENT_THEME_LINK" ]]; then
+  HYPRVOID_THEME=$(basename "$(readlink "$CURRENT_THEME_LINK")")
+else
+  exit 0
+fi
+
+# Switch Obsidian CSS theme using obsidian-theme script
+if command -v obsidian-theme >/dev/null 2>&1; then
+  obsidian-theme switch "$HYPRVOID_THEME" 2>/dev/null || true
+fi
+
+# Set base color scheme (light/dark mode)
+VAULT_DIR="$HOME/Documents/vault-01"
+APPEARANCE_FILE="$VAULT_DIR/.obsidian/appearance.json"
+
+if [[ -f "$APPEARANCE_FILE" ]]; then
+  case "$HYPRVOID_THEME" in
+    rose-pine-dawn)
+      # Set to light mode
+      sed -i 's/"theme": "[^"]*"/"theme": "obsidian"/' "$APPEARANCE_FILE"
+      ;;
+    catppuccin-mocha|osaka-jade)
+      # Set to dark mode
+      sed -i 's/"theme": "[^"]*"/"theme": "moonstone"/' "$APPEARANCE_FILE"
+      ;;
+  esac
+  
+  # Handle Obsidian restart if running
+  if pgrep -x obsidian >/dev/null 2>&1; then
+    # Offer to restart Obsidian via dmenu confirmation
+    if command -v wofi >/dev/null 2>&1; then
+      response=$(echo -e "󰑐  Restart Obsidian\n  Keep Running" | wofi --dmenu --prompt "Obsidian Theme Updated" --lines 2 --width 300 --height 120)
+      case "$response" in
+        *Restart*)
+          # Kill all Obsidian processes
+          pkill -9 obsidian 2>/dev/null || true
+          pkill -9 -f "obsidian" 2>/dev/null || true
+          sleep 1
+          # Clear session storage to force reload
+          rm -rf ~/.config/obsidian/'Session Storage' 2>/dev/null || true
+          # Restart Obsidian
+          nohup obsidian >/dev/null 2>&1 &
+          disown
+          ;;
+        *)
+          notify-send "Theme Applied" "Restart Obsidian manually to see $HYPRVOID_THEME theme" -t 5000
+          ;;
+      esac
+    else
+      notify-send "Theme Applied" "Restart Obsidian to see $HYPRVOID_THEME theme" -t 5000
+    fi
+  fi
+fi

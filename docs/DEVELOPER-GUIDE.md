@@ -1,9 +1,37 @@
 # HyprVoid Developer Guide
 
-**Version**: 1.0  
-**Last Updated**: 2025-11-07  
+**Version**: 1.1  
+**Last Updated**: 2025-11-08  
 
 This guide explains how to work on HyprVoid as a developer or contributor. It covers code standards, menu system patterns, icon usage, testing procedures, and contribution workflows.
+
+---
+
+## ⚠️ CRITICAL: READ THIS FIRST
+
+**PATH Issues in Menu-Invoked Scripts**
+
+Scripts called from menus (SUPER+ALT+SPACE, etc.) do NOT have `~/.local/bin` in their PATH.
+
+**The Problem**: A script works perfectly from terminal but fails when run from the menu.
+
+**The Solution**: Always use absolute paths for custom scripts:
+
+```bash
+# ❌ WRONG - relies on PATH
+if command -v my-script >/dev/null 2>&1; then
+  my-script args
+fi
+
+# ✅ CORRECT - uses absolute path
+if [[ -x "$HOME/.local/bin/my-script" ]]; then
+  "$HOME/.local/bin/my-script" args
+fi
+```
+
+**For complete details**: Read [PATH-ISSUE-CRITICAL.md](PATH-ISSUE-CRITICAL.md)
+
+This issue caused Obsidian themes to fail from menus while working from terminal. It cost hours of debugging. Don't repeat this mistake.
 
 ---
 

@@ -4,32 +4,47 @@
 
 set -Eeuo pipefail
 
-THEME_FILE="$HOME/.config/hyprvoid/current/theme/obsidian.json"
+# DEBUG LOGGING
+LOG_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/hyprvoid"
+LOG_FILE="$LOG_DIR/log"
+mkdir -p "$LOG_DIR"
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] obsidian-theme-set STARTED" >> "$LOG_FILE"
 
-if [[ ! -f "$THEME_FILE" ]] || ! command -v jq >/dev/null 2>&1; then
+# Get current hyprvoid theme name
+CURRENT_THEME_LINK="$HOME/.config/hyprvoid/current/theme"
+if [[ -L "$CURRENT_THEME_LINK" ]]; then
+  HYPRVOID_THEME=$(basename "$(readlink "$CURRENT_THEME_LINK")")
+else
   exit 0
 fi
 
-THEME_NAME=$(jq -r '.theme' "$THEME_FILE")
-
-# Find Obsidian config directory (can vary by vault)
-OBSIDIAN_BASE="$HOME/.config/obsidian"
-
-if [[ ! -d "$OBSIDIAN_BASE" ]]; then
-  # Try alternate location
-  OBSIDIAN_BASE="$HOME/snap/obsidian/current/.config/obsidian"
+# Switch Obsidian CSS theme using obsidian-theme script
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] Calling obsidian-theme switch $HYPRVOID_THEME" >> "$LOG_FILE"
+if [[ -x "$HOME/.local/bin/obsidian-theme" ]]; then
+  "$HOME/.local/bin/obsidian-theme" switch "$HYPRVOID_THEME" 2>/dev/null || true
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] obsidian-theme switch completed" >> "$LOG_FILE"
+else
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] obsidian-theme command not found at $HOME/.local/bin/obsidian-theme" >> "$LOG_FILE"
 fi
 
-if [[ ! -d "$OBSIDIAN_BASE" ]]; then
-  exit 0
-fi
+# Set base color scheme (light/dark mode)
+VAULT_DIR="$HOME/Documents/vault-01"
+APPEARANCE_FILE="$VAULT_DIR/.obsidian/appearance.json"
 
-# Update all vault appearance.json files
-find "$OBSIDIAN_BASE" -name "appearance.json" -type f | while read -r config_file; do
-  if [[ -f "$config_file" ]]; then
-    # Use jq to update the theme field
-    tmp_file=$(mktemp)
-    jq --arg theme "$THEME_NAME" '.theme = $theme' "$config_file" > "$tmp_file"
-    mv "$tmp_file" "$config_file"
+if [[ -f "$APPEARANCE_FILE" ]]; then
+  case "$HYPRVOID_THEME" in
+    rose-pine-dawn)
+      # Set to light mode
+      sed -i 's/"theme": "[^"]*"/"theme": "obsidian"/' "$APPEARANCE_FILE"
+      ;;
+    catppuccin-mocha|osaka-jade)
+      # Set to dark mode
+      sed -i 's/"theme": "[^"]*"/"theme": "moonstone"/' "$APPEARANCE_FILE"
+      ;;
+  esac
+  
+  # Notify if Obsidian is running
+  if pgrep -x obsidian >/dev/null 2>&1; then
+    notify-send "Theme Applied" "Restart Obsidian to see $HYPRVOID_THEME theme" -t 5000
   fi
-done
+fi
