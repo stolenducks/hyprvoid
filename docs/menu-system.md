@@ -51,6 +51,10 @@ HyprVoid Menu (SUPER+ALT+SPACE)
 ├── Install           → Package installation
 ├── Remove            → Package removal
 ├── Update            → System updates
+│   ├── System Update → Update all packages (xbps-install -Syu)
+│   ├── Warp Terminal → Update Warp Terminal to latest version
+│   ├── Config Refresh → Reload Hyprland configuration
+│   └── Restart Services → Restart Waybar, Mako, or Hyprpaper
 ├── About             → HyprVoid information
 └── System            → Power options (lock, logout, reboot, shutdown)
 ```

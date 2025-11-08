@@ -162,21 +162,16 @@ show_toggle_menu() {
 
 # ========== STYLE MENU ==========
 show_style_menu() {
-  local options="󰏘  Theme
-󰸉  Background
-  Font"
+  local options="󰸱  Themes
+󰆊  Background
+󰛖  Font"
   
   local choice
   choice=$(echo "$options" | dmenu "Style")
   
   case "$choice" in
-    *Theme*)
-      theme_choice=$(echo -e "Dark\nLight\nToggle" | dmenu "Select Theme")
-      case "$theme_choice" in
-        Dark)   "$SCRIPT_DIR/hyprvoid-theme-set" dark ;;
-        Light)  "$SCRIPT_DIR/hyprvoid-theme-set" light ;;
-        Toggle) "$SCRIPT_DIR/hyprvoid-theme-set" toggle ;;
-      esac
+    *Themes*)
+      show_themes_menu
       ;;
     *Background*)
       "$SCRIPT_DIR/hyprvoid-theme-bg-next"
@@ -186,6 +181,32 @@ show_style_menu() {
       notify "Font" "Current: $current_font - Change in settings"
       ;;
   esac
+}
+
+show_themes_menu() {
+  # Get list of available themes
+  local themes
+  themes=$("$SCRIPT_DIR/hyprvoid-theme-list" 2>/dev/null || echo "")
+  
+  if [[ -z "$themes" ]]; then
+    notify "Themes" "No themes found. Run hyprvoid-theme-install"
+    return
+  fi
+  
+  # Format theme names with icons
+  local formatted_themes=""
+  while IFS= read -r theme; do
+    formatted_themes="${formatted_themes}󰏘  ${theme}\n"
+  done <<< "$themes"
+  
+  local choice
+  choice=$(echo -e "$formatted_themes" | dmenu "Select Theme")
+  
+  if [[ -n "$choice" ]]; then
+    # Extract theme name (remove icon and spaces)
+    theme_name=$(echo "$choice" | sed 's/^[^a-zA-Z]*//' | tr -d ' ')
+    "$SCRIPT_DIR/hyprvoid-theme-set" "$theme_name"
+  fi
 }
 
 # ========== SETUP MENU ==========
@@ -297,6 +318,7 @@ show_remove_menu() {
 # ========== UPDATE MENU ==========
 show_update_menu() {
   local options="󰚰  System Update
+󰞷  Warp Terminal
 󰑓  Config Refresh
 󰑐  Restart Services"
   
@@ -307,6 +329,11 @@ show_update_menu() {
     *System*)
       if confirm "Update system packages?"; then
         run_in_terminal "sudo xbps-install -Syu"
+      fi
+      ;;
+    *Warp*)
+      if confirm "Update Warp Terminal now?"; then
+        run_in_terminal "hyprvoid-warp-update"
       fi
       ;;
     *Config*)

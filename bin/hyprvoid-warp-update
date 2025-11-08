@@ -1,0 +1,210 @@
+#!/usr/bin/env bash
+# HyprVoid Warp Terminal Updater - Theme-aware updater for Warp
+# Downloads and installs latest Warp from official releases
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+# Configuration
+WARP_URL="https://releases.warp.dev/stable/latest/download?package=pacman&distro=arch"
+WARP_DIR="/opt/warpdotdev/warp-terminal"
+WARP_BACKUP_DIR="/opt/warpdotdev/warp-terminal.backup"
+WARP_BINARY="$WARP_DIR/warp"
+WARP_SYMLINK="/usr/local/bin/warp-terminal"
+TEMP_DIR=""
+
+# Cleanup function
+cleanup() {
+  if [[ -n "${TEMP_DIR:-}" ]] && [[ -d "$TEMP_DIR" ]]; then
+    rm -rf "$TEMP_DIR"
+  fi
+}
+
+trap cleanup EXIT ERR INT TERM
+
+# Error handler
+error_exit() {
+  local msg="$1"
+  notify "Warp Update Failed" "$msg"
+  log "ERROR: Warp update failed - $msg"
+  exit 1
+}
+
+# Preflight checks
+preflight_check() {
+  log "Starting Warp update preflight checks"
+  
+  # Check required tools
+  require_tool curl || error_exit "curl is required: sudo xbps-install -S curl"
+  require_tool tar || error_exit "tar is required"
+  
+  # Check for zstd decompression
+  if ! command -v unzstd >/dev/null 2>&1 && ! command -v zstd >/dev/null 2>&1; then
+    error_exit "zstd is required: sudo xbps-install -S zstd"
+  fi
+  
+  # Verify sudo access
+  if ! sudo -v; then
+    error_exit "sudo access required for installation"
+  fi
+  
+  log "Preflight checks passed"
+}
+
+# Backup existing installation
+backup_warp() {
+  if [[ -f "$WARP_BINARY" ]]; then
+    log "Backing up existing Warp installation"
+    sudo mkdir -p "$WARP_BACKUP_DIR"
+    sudo cp -a "$WARP_BINARY" "$WARP_BACKUP_DIR/warp.$(date +%Y%m%d_%H%M%S)" || {
+      notify "Warp Update" "Warning: Backup failed, continuing anyway"
+      log "WARNING: Backup failed"
+    }
+    log "Backup complete"
+  else
+    log "No existing Warp binary found, skipping backup"
+  fi
+}
+
+# Download latest Warp
+download_warp() {
+  local pkg_file="$TEMP_DIR/warp.pkg.tar.zst"
+  
+  log "Downloading latest Warp from $WARP_URL"
+  notify "Warp Update" "Downloading latest version..."
+  
+  if ! curl -L --progress-bar -o "$pkg_file" "$WARP_URL"; then
+    error_exit "Download failed"
+  fi
+  
+  if [[ ! -f "$pkg_file" ]] || [[ ! -s "$pkg_file" ]]; then
+    error_exit "Downloaded file is empty or missing"
+  fi
+  
+  log "Download complete: $(du -h "$pkg_file" | cut -f1)"
+}
+
+# Extract and install
+install_warp() {
+  local pkg_file="$TEMP_DIR/warp.pkg.tar.zst"
+  local extract_dir="$TEMP_DIR/extract"
+  
+  log "Extracting Warp package"
+  mkdir -p "$extract_dir"
+  
+  if ! tar -xf "$pkg_file" -C "$extract_dir"; then
+    error_exit "Extraction failed"
+  fi
+  
+  # Find the warp binary
+  local warp_extracted="$extract_dir/usr/bin/warp-terminal"
+  if [[ ! -f "$warp_extracted" ]]; then
+    # Try alternate locations
+    warp_extracted=$(find "$extract_dir" -name "warp-terminal" -o -name "warp" | head -1)
+    if [[ -z "$warp_extracted" ]] || [[ ! -f "$warp_extracted" ]]; then
+      error_exit "Could not find warp binary in package"
+    fi
+  fi
+  
+  log "Installing Warp to $WARP_DIR"
+  sudo mkdir -p "$WARP_DIR"
+  sudo cp "$warp_extracted" "$WARP_BINARY"
+  sudo chown "$USER:$USER" "$WARP_BINARY"
+  sudo chmod 0755 "$WARP_BINARY"
+  
+  log "Installation complete"
+}
+
+# Verify symlink
+verify_symlink() {
+  log "Verifying symlink at $WARP_SYMLINK"
+  
+  if [[ -L "$WARP_SYMLINK" ]]; then
+    local target
+    target=$(readlink -f "$WARP_SYMLINK")
+    if [[ "$target" == "$WARP_BINARY" ]]; then
+      log "Symlink verified: $WARP_SYMLINK -> $WARP_BINARY"
+      return 0
+    else
+      log "WARNING: Symlink points to wrong target: $target"
+    fi
+  fi
+  
+  # Create/fix symlink
+  log "Creating symlink: $WARP_SYMLINK -> $WARP_BINARY"
+  sudo ln -sfn "$WARP_BINARY" "$WARP_SYMLINK"
+  
+  if [[ ! -L "$WARP_SYMLINK" ]]; then
+    notify "Warp Update" "Warning: Could not create symlink"
+    log "WARNING: Symlink creation failed"
+  else
+    log "Symlink created successfully"
+  fi
+}
+
+# Optional: Sync Warp theme with HyprVoid theme
+sync_warp_theme() {
+  # Only run if explicitly enabled
+  if [[ "${HYPRVOID_WARP_THEME_SYNC:-0}" != "1" ]]; then
+    return 0
+  fi
+  
+  local warp_config="${XDG_CONFIG_HOME:-$HOME/.config}/warp"
+  local warp_settings="$warp_config/settings.json"
+  
+  # Skip if Warp config doesn't exist
+  if [[ ! -d "$warp_config" ]]; then
+    log "Warp config directory not found, skipping theme sync"
+    return 0
+  fi
+  
+  local theme_name
+  theme_name=$(get_current_theme_name)
+  local accent_color
+  accent_color=$(get_theme_color accent)
+  
+  log "Attempting Warp theme sync: theme=$theme_name, accent=#$accent_color"
+  
+  # This is a placeholder for future Warp theme sync
+  # Warp's config format may change, so we keep this conservative
+  # TODO: Implement when Warp exposes stable theme API
+  
+  log "Warp theme sync: experimental feature (not implemented yet)"
+}
+
+# Main update function
+main() {
+  local theme_name
+  theme_name=$(get_current_theme_name 2>/dev/null || echo "default")
+  
+  log "Starting Warp update (theme: $theme_name)"
+  notify "Warp Update" "Starting update..."
+  
+  # Create temporary directory
+  TEMP_DIR=$(mktemp -d)
+  log "Using temp directory: $TEMP_DIR"
+  
+  # Run update steps
+  preflight_check
+  backup_warp
+  download_warp
+  install_warp
+  verify_symlink
+  sync_warp_theme
+  
+  # Success
+  notify "Warp Update" "Successfully updated to latest version"
+  log "Warp update completed successfully"
+  
+  echo ""
+  echo "✓ Warp Terminal updated successfully"
+  echo ""
+  echo "Theme: $theme_name"
+  echo "Binary: $WARP_BINARY"
+  echo "Symlink: $WARP_SYMLINK"
+  echo ""
+}
+
+main

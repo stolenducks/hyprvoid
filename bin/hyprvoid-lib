@@ -87,6 +87,43 @@ detect_theme() {
   fi
 }
 
+get_current_theme_name() {
+  local theme_link="${HOME}/.config/hyprvoid/current/theme"
+  
+  if [[ -L "$theme_link" ]]; then
+    basename "$(readlink -f "$theme_link")"
+  elif [[ -d "$theme_link" ]]; then
+    basename "$theme_link"
+  else
+    echo "default"
+  fi
+}
+
+get_theme_color() {
+  local role="${1:-accent}"  # accent, fg, bg
+  local theme_link="${HOME}/.config/hyprvoid/current/theme"
+  local wofi_css="${theme_link}/wofi.css"
+  
+  if [[ -f "$wofi_css" ]]; then
+    case "$role" in
+      accent)
+        grep -oP 'border:.*#\K[0-9A-Fa-f]{6}' "$wofi_css" | head -1 || echo "FFFFFF"
+        ;;
+      fg)
+        grep -oP 'color:.*#\K[0-9A-Fa-f]{6}' "$wofi_css" | head -1 || echo "FFFFFF"
+        ;;
+      bg)
+        grep -oP 'background-color:.*rgba?\(([0-9,\s]+)' "$wofi_css" | head -1 || echo "000000"
+        ;;
+      *)
+        echo "FFFFFF"
+        ;;
+    esac
+  else
+    echo "FFFFFF"
+  fi
+}
+
 # === Process Management ===
 
 pidfile_path() {
@@ -144,8 +181,8 @@ run_in_terminal() {
   local cmd="$*"
   local term
   
-  # Detect available terminal
-  for t in foot alacritty kitty xterm; do
+  # Detect available terminal (ghostty prioritized)
+  for t in ghostty foot alacritty kitty xterm; do
     if command -v "$t" >/dev/null 2>&1; then
       term="$t"
       break
@@ -158,7 +195,7 @@ run_in_terminal() {
   fi
   
   case "$term" in
-    foot|alacritty|kitty)
+    ghostty|foot|alacritty|kitty)
       "$term" -e bash -c "$cmd; echo; read -n 1 -s -r -p 'Press any key to close...'"
       ;;
     *)
@@ -188,5 +225,6 @@ optional_tool() {
 
 # Export functions for subshells if needed
 export -f log notify dmenu confirm detect_theme
+export -f get_current_theme_name get_theme_color
 export -f is_running save_pid kill_by_pidfile pidfile_path
 export -f run_in_terminal require_tool optional_tool

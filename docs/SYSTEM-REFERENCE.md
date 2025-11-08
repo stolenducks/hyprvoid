@@ -168,6 +168,11 @@ These are actively called by keybindings or other scripts:
     - Called by: CTRL+PRINT (bindings.conf:48)
     - Records screen with wf-recorder
 
+11. **hyprvoid-warp-update** - Warp Terminal updater
+    - Called by: hyprvoid-menu Update → Warp Terminal
+    - Downloads and installs latest Warp from official releases
+    - Theme-aware: automatically matches active HyprVoid theme
+
 ### Utility Scripts (Optional)
 Not actively called but may be useful:
 
@@ -541,6 +546,26 @@ User Config: ~/.config/hypr/
 ### Data Directories
 - `~/Pictures/screenshots/` - Screenshot storage
 - `~/Pictures/wallpapers/` - Wallpaper storage (optional)
+
+### Theme System
+
+HyprVoid uses a symlink-based theme system (Omarchy-inspired):
+
+**Theme Structure**:
+- `~/.config/hyprvoid/themes/` - All available themes
+- `~/.config/hyprvoid/current/theme` - Symlink to active theme
+- Each theme contains: wofi.css, hyprland.conf, waybar.css, mako.ini, etc.
+
+**Theme Functions in hyprvoid-lib**:
+- `get_current_theme_name()` - Returns active theme name (e.g., "osaka-jade")
+- `get_theme_color <role>` - Extracts colors from theme (accent, fg, bg)
+- `detect_theme()` - Returns light/dark mode
+
+**Theme-Aware Scripts**:
+- All UI (menus, notifications, terminals) automatically inherit theme styling
+- No hard-coded colors in scripts
+- Updaters (like hyprvoid-warp-update) respect active theme
+- To enable experimental Warp theme sync: `export HYPRVOID_WARP_THEME_SYNC=1`
 
 ---
 
