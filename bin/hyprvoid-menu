@@ -333,7 +333,7 @@ show_update_menu() {
       ;;
     *Warp*)
       if confirm "Update Warp Terminal now?"; then
-        run_in_terminal "hyprvoid-warp-update"
+        run_in_terminal "$HOME/.local/bin/hyprvoid-warp-update"
       fi
       ;;
     *Config*)

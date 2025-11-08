@@ -195,8 +195,12 @@ run_in_terminal() {
   fi
   
   case "$term" in
-    ghostty|foot|alacritty|kitty)
-      "$term" -e bash -c "$cmd; echo; read -n 1 -s -r -p 'Press any key to close...'"
+    ghostty)
+      # Ghostty needs explicit bash invocation for read -n
+      "$term" -- bash -c "$cmd; echo ''; echo 'Press any key to close...'; read -n 1 -s -r"
+      ;;
+    foot|alacritty|kitty)
+      "$term" -e bash -c "$cmd; echo ''; echo 'Press any key to close...'; read -n 1 -s -r"
       ;;
     *)
       "$term" -e bash -c "$cmd"

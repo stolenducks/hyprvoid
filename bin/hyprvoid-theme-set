@@ -1,76 +1,60 @@
 #!/usr/bin/env bash
-# HyprVoid Theme Switcher - Switch between dark and light Catppuccin themes
-# Usage: hyprvoid-theme-set [dark|light|toggle]
+# HyprVoid Theme Switcher - Omarchy-inspired symlink-based theming
+# Usage: hyprvoid-theme-set <theme-name>
 
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/hyprvoid-lib"
 
-HYPR_CONFIG="$HOME/.config/hypr"
-WOFI_CONFIG="$HOME/.config/wofi"
-WAYBAR_CONFIG="$HOME/.config/waybar"
+THEMES_DIR="$HOME/.config/hyprvoid/themes"
+CURRENT_THEME_LINK="$HOME/.config/hyprvoid/current/theme"
 
-set_theme() {
-  local theme="$1"
-  
-  log "Setting theme to: $theme"
-  
-  # Update Hyprland look & feel
-  echo "source = ~/.config/hypr/looknfeel-${theme}.conf" > "$HYPR_CONFIG/looknfeel.conf"
-  
-  # Update Wofi style (create symlink)
-  if [[ -f "$WOFI_CONFIG/style-${theme}.css" ]]; then
-    ln -sf "$WOFI_CONFIG/style-${theme}.css" "$WOFI_CONFIG/style.css"
-  fi
-  
-  # Update Waybar style (create symlink) if waybar exists
-  if [[ -d "$WAYBAR_CONFIG" ]] && [[ -f "$WAYBAR_CONFIG/style-${theme}.css" ]]; then
-    ln -sf "$WAYBAR_CONFIG/style-${theme}.css" "$WAYBAR_CONFIG/style.css"
-    
-    # Reload Waybar CSS
-    if pgrep -x waybar >/dev/null; then
-      pkill -SIGUSR2 waybar 2>/dev/null || true
-    fi
-  fi
-  
-  # Reload Hyprland config
-  if command -v hyprctl >/dev/null 2>&1; then
-    hyprctl reload 2>/dev/null || true
-  fi
-  
-  # Set wallpaper for the new theme
-  if [[ -x "$SCRIPT_DIR/hyprvoid-theme-bg-set" ]]; then
-    "$SCRIPT_DIR/hyprvoid-theme-bg-set" "$theme" || true
-  fi
-  
-  notify "Theme Changed" "Switched to ${theme^} theme"
-  log "Theme set to $theme successfully"
-}
+if [[ -z "${1:-}" ]]; then
+  echo "Usage: hyprvoid-theme-set <theme-name>"
+  echo ""
+  echo "Available themes:"
+  "$SCRIPT_DIR/hyprvoid-theme-list"
+  exit 1
+fi
 
-main() {
-  local mode="${1:-toggle}"
-  
-  case "$mode" in
-    dark)
-      set_theme "dark"
-      ;;
-    light)
-      set_theme "light"
-      ;;
-    toggle)
-      current="$(detect_theme)"
-      if [[ "$current" == "dark" ]]; then
-        set_theme "light"
-      else
-        set_theme "dark"
-      fi
-      ;;
-    *)
-      echo "Usage: $0 [dark|light|toggle]"
-      exit 1
-      ;;
-  esac
-}
+THEME_NAME="$1"
+THEME_PATH="$THEMES_DIR/$THEME_NAME"
 
-main "$@"
+# Validate theme exists
+if [[ ! -d "$THEME_PATH" ]]; then
+  notify "Theme Error" "Theme '$THEME_NAME' does not exist in $THEMES_DIR"
+  log "ERROR: Theme '$THEME_NAME' not found"
+  exit 1
+fi
+
+log "Switching to theme: $THEME_NAME"
+
+# Update theme symlink atomically
+mkdir -p "$(dirname "$CURRENT_THEME_LINK")"
+ln -sfn "$THEME_PATH" "$CURRENT_THEME_LINK"
+
+# Apply theme to various applications
+"$SCRIPT_DIR/hyprvoid-theme-set-terminal" || true
+"$SCRIPT_DIR/hyprvoid-theme-set-gtk" || true
+"$SCRIPT_DIR/hyprvoid-theme-set-vscode" || true
+
+# Reload Hyprland to pick up new colors
+if command -v hyprctl >/dev/null 2>&1; then
+  hyprctl reload 2>/dev/null || true
+fi
+
+# Reload Mako notifications
+if command -v makoctl >/dev/null 2>&1; then
+  makoctl reload 2>/dev/null || true
+fi
+
+# Restart Waybar if running
+if pgrep -x waybar >/dev/null; then
+  pkill waybar
+  waybar &
+  disown
+fi
+
+notify "Theme" "Switched to $THEME_NAME"
+log "Theme successfully set to: $THEME_NAME"
