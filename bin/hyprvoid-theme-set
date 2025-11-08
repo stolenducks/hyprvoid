@@ -38,6 +38,7 @@ ln -sfn "$THEME_PATH" "$CURRENT_THEME_LINK"
 "$SCRIPT_DIR/hyprvoid-theme-set-terminal" || true
 "$SCRIPT_DIR/hyprvoid-theme-set-gtk" || true
 "$SCRIPT_DIR/hyprvoid-theme-set-vscode" || true
+"$SCRIPT_DIR/hyprvoid-theme-set-obsidian" || true
 
 # Reload Hyprland to pick up new colors
 if command -v hyprctl >/dev/null 2>&1; then

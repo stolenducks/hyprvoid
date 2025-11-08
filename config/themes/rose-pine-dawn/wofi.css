@@ -1,0 +1,35 @@
+/* HyprVoid - Rosé Pine Dawn Theme */
+/* Wofi launcher styling */
+
+window {
+  margin: 0;
+  padding: 0;
+  border: 2px solid #d7827e;
+  background-color: rgba(250, 244, 237, 0.95);
+  border-radius: 0;
+}
+
+#input {
+  margin: 12px;
+  padding: 12px;
+  color: #575279;
+  background-color: #fffaf3;
+  border: none;
+  border-radius: 0;
+}
+
+#text {
+  margin: 0;
+  padding: 0;
+  color: #575279;
+}
+
+#entry:selected {
+  background-color: #f2e9e1;
+  border-radius: 0;
+}
+
+#entry:selected #text {
+  color: #d7827e;
+  font-weight: 600;
+}

@@ -159,3 +159,49 @@ MIT
 - [Hyprland](https://hyprland.org/)
 - [Wofi](https://hg.sr.ht/~scoopta/wofi)
 - [Void Linux](https://voidlinux.org/)
+
+## Themes
+
+HyprVoid now includes three beautiful themes:
+
+### Available Themes
+
+1. **osaka-jade** (Default)
+   - Inspired by Osaka city aesthetics
+   - Jade green accents (#71CEAD)
+   - Dark warm background with natural tones
+
+2. **catppuccin-mocha** 🌙
+   - Ultra-popular dark theme
+   - Blue accents (#89b4fa)
+   - Matches your Obsidian theme
+   - Perfect for low-light environments
+
+3. **rose-pine-dawn** ☀️
+   - Popular light theme
+   - Rose/coral accents (#d7827e)
+   - Warm, comfortable light background
+   - Excellent for daytime use
+
+### Switching Themes
+
+```bash
+# List available themes
+hyprvoid-theme-list
+
+# Switch to a theme
+hyprvoid-theme-set catppuccin-mocha
+hyprvoid-theme-set rose-pine-dawn
+hyprvoid-theme-set osaka-jade
+```
+
+The theme switcher automatically updates:
+- Hyprland window borders and shadows
+- Wofi launcher styling
+- Waybar colors
+- Mako notifications
+- Ghostty terminal colors
+- GTK theme
+- VSCode theme (if configured)
+
+All themes maintain HyprVoid's signature sharp corners (no rounding) and 2px borders.

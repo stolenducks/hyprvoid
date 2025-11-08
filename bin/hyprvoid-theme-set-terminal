@@ -1,11 +1,61 @@
 #!/usr/bin/env bash
 # HyprVoid Terminal Theme Setter
-# Reloads terminal emulators to pick up new theme
+# Applies theme colors to terminal emulators
 
 set -Eeuo pipefail
 
-# Reload Ghostty (SIGUSR2 reloads config)
-killall -SIGUSR2 ghostty 2>/dev/null || true
+THEME_LINK="$HOME/.config/hyprvoid/current/theme"
+MARKER_START="# === HyprVoid Theme Colors (DO NOT EDIT MANUALLY) ==="
+MARKER_END="# === End HyprVoid Theme Colors ==="
+
+if [[ ! -L "$THEME_LINK" ]]; then
+  echo "No theme selected"
+  exit 1
+fi
+
+# Apply Ghostty theme colors
+if [[ -f "${THEME_LINK}/ghostty.conf" ]]; then
+  GHOSTTY_CONFIG="$HOME/.config/ghostty/config"
+  GHOSTTY_BACKUP="$HOME/.config/ghostty/config.hyprvoid-original"
+  
+  mkdir -p "$HOME/.config/ghostty"
+  
+  # Backup original config once (before any HyprVoid modifications)
+  if [[ -f "$GHOSTTY_CONFIG" ]] && [[ ! -f "$GHOSTTY_BACKUP" ]]; then
+    if ! grep -q "$MARKER_START" "$GHOSTTY_CONFIG" 2>/dev/null; then
+      cp "$GHOSTTY_CONFIG" "$GHOSTTY_BACKUP"
+    fi
+  fi
+  
+  # Extract non-theme content (everything after the theme section or original config)
+  if [[ -f "$GHOSTTY_CONFIG" ]]; then
+    if grep -q "$MARKER_END" "$GHOSTTY_CONFIG" 2>/dev/null; then
+      # Remove theme section and keep rest
+      sed -n "/${MARKER_END}/,\$p" "$GHOSTTY_CONFIG" | tail -n +2 > "${GHOSTTY_CONFIG}.user"
+    else
+      # No markers yet, keep everything
+      cp "$GHOSTTY_CONFIG" "${GHOSTTY_CONFIG}.user"
+    fi
+  else
+    # No config exists, create empty user section
+    touch "${GHOSTTY_CONFIG}.user"
+  fi
+  
+  # Build new config: markers + theme + user content
+  {
+    echo "$MARKER_START"
+    cat "${THEME_LINK}/ghostty.conf"
+    echo "$MARKER_END"
+    echo ""
+    cat "${GHOSTTY_CONFIG}.user"
+  } > "${GHOSTTY_CONFIG}.new"
+  
+  mv "${GHOSTTY_CONFIG}.new" "$GHOSTTY_CONFIG"
+  rm -f "${GHOSTTY_CONFIG}.user"
+  
+  # Reload Ghostty (SIGUSR2 reloads config)
+  killall -SIGUSR2 ghostty 2>/dev/null || true
+fi
 
 # Reload Kitty (SIGUSR1 reloads config)
 killall -SIGUSR1 kitty 2>/dev/null || true

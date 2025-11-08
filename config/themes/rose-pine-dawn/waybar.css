@@ -1,0 +1,8 @@
+/* HyprVoid - Rosé Pine Dawn Theme */
+/* Waybar color variables */
+
+@define-color background #faf4ed;
+@define-color foreground #575279;
+@define-color accent #d7827e;
+@define-color inactive #f2e9e1;
+@define-color text-secondary #797593;

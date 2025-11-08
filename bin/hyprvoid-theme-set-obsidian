@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# HyprVoid Obsidian Theme Setter
+# Sets Obsidian theme from current HyprVoid theme
+
+set -Eeuo pipefail
+
+THEME_FILE="$HOME/.config/hyprvoid/current/theme/obsidian.json"
+
+if [[ ! -f "$THEME_FILE" ]] || ! command -v jq >/dev/null 2>&1; then
+  exit 0
+fi
+
+THEME_NAME=$(jq -r '.theme' "$THEME_FILE")
+
+# Find Obsidian config directory (can vary by vault)
+OBSIDIAN_BASE="$HOME/.config/obsidian"
+
+if [[ ! -d "$OBSIDIAN_BASE" ]]; then
+  # Try alternate location
+  OBSIDIAN_BASE="$HOME/snap/obsidian/current/.config/obsidian"
+fi
+
+if [[ ! -d "$OBSIDIAN_BASE" ]]; then
+  exit 0
+fi
+
+# Update all vault appearance.json files
+find "$OBSIDIAN_BASE" -name "appearance.json" -type f | while read -r config_file; do
+  if [[ -f "$config_file" ]]; then
+    # Use jq to update the theme field
+    tmp_file=$(mktemp)
+    jq --arg theme "$THEME_NAME" '.theme = $theme' "$config_file" > "$tmp_file"
+    mv "$tmp_file" "$config_file"
+  fi
+done

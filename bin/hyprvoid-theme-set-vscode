@@ -10,7 +10,7 @@ if [[ ! -f "$THEME_FILE" ]] || ! command -v jq >/dev/null 2>&1; then
   exit 0
 fi
 
-THEME_NAME=$(jq -r '.name' "$THEME_FILE")
+THEME_NAME=$(jq -r '."workbench.colorTheme"' "$THEME_FILE")
 
 # Update VS Code settings if it exists
 VSCODE_SETTINGS="$HOME/.config/Code/User/settings.json"
