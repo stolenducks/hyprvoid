@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# HyprVoid - Switch back to LightDM login manager
+# Safely disables greetd and re-enables LightDM
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root (use sudo)" 
+   exit 1
+fi
+
+log "Switching display manager from greetd to LightDM..."
+
+# Disable and stop greetd
+if [[ -L /var/service/greetd ]]; then
+    log "Disabling greetd service..."
+    rm /var/service/greetd
+    sv stop greetd 2>/dev/null || true
+fi
+
+# Enable LightDM
+if [[ ! -L /var/service/lightdm ]]; then
+    log "Enabling LightDM service..."
+    ln -s /etc/sv/lightdm /var/service/
+fi
+
+log "Display manager switched to LightDM"
+echo ""
+echo "✓ LightDM is now enabled"
+echo "✓ greetd has been disabled"
+echo ""
+echo "To activate LightDM:"
+echo "  1. Save your work and logout"
+echo "  2. Or reboot: sudo reboot"

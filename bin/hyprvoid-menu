@@ -318,7 +318,6 @@ show_remove_menu() {
 # ========== UPDATE MENU ==========
 show_update_menu() {
   local options="󰚰  System Update
-󰞷  Warp Terminal
 󰑓  Config Refresh
 󰑐  Restart Services"
   
@@ -329,11 +328,6 @@ show_update_menu() {
     *System*)
       if confirm "Update system packages?"; then
         run_in_terminal "sudo xbps-install -Syu"
-      fi
-      ;;
-    *Warp*)
-      if confirm "Update Warp Terminal now?"; then
-        run_in_terminal "$HOME/.local/bin/hyprvoid-warp-update"
       fi
       ;;
     *Config*)

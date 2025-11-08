@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# HyprVoid Theme Installer
+# Installs themes from repo to ~/.config/hyprvoid/themes/
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$HOME/hyprvoid"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+THEMES_DIR="$HOME/.config/hyprvoid/themes"
+CURRENT_THEME_LINK="$HOME/.config/hyprvoid/current/theme"
+
+log "Installing HyprVoid themes..."
+
+# Create themes directory
+mkdir -p "$THEMES_DIR"
+
+# Copy themes from repo
+if [[ -d "$REPO_ROOT/config/themes" ]]; then
+  cp -r "$REPO_ROOT/config/themes"/* "$THEMES_DIR/"
+  log "Themes copied to $THEMES_DIR"
+else
+  log "ERROR: No themes found in repo"
+  exit 1
+fi
+
+# Set default theme if none is set
+if [[ ! -L "$CURRENT_THEME_LINK" ]]; then
+  log "Setting default theme: osaka-jade"
+  mkdir -p "$(dirname "$CURRENT_THEME_LINK")"
+  "$SCRIPT_DIR/hyprvoid-theme-set" "osaka-jade"
+else
+  log "Theme symlink already exists, keeping current theme"
+fi
+
+notify "Themes Installed" "HyprVoid themes ready"
+log "Theme installation complete"

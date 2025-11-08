@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# HyprVoid Theme Switcher - Switch between dark and light Catppuccin themes
+# Usage: hyprvoid-theme-set [dark|light|toggle]
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+HYPR_CONFIG="$HOME/.config/hypr"
+WOFI_CONFIG="$HOME/.config/wofi"
+WAYBAR_CONFIG="$HOME/.config/waybar"
+
+set_theme() {
+  local theme="$1"
+  
+  log "Setting theme to: $theme"
+  
+  # Update Hyprland look & feel
+  echo "source = ~/.config/hypr/looknfeel-${theme}.conf" > "$HYPR_CONFIG/looknfeel.conf"
+  
+  # Update Wofi style (create symlink)
+  if [[ -f "$WOFI_CONFIG/style-${theme}.css" ]]; then
+    ln -sf "$WOFI_CONFIG/style-${theme}.css" "$WOFI_CONFIG/style.css"
+  fi
+  
+  # Update Waybar style (create symlink) if waybar exists
+  if [[ -d "$WAYBAR_CONFIG" ]] && [[ -f "$WAYBAR_CONFIG/style-${theme}.css" ]]; then
+    ln -sf "$WAYBAR_CONFIG/style-${theme}.css" "$WAYBAR_CONFIG/style.css"
+    
+    # Reload Waybar CSS
+    if pgrep -x waybar >/dev/null; then
+      pkill -SIGUSR2 waybar 2>/dev/null || true
+    fi
+  fi
+  
+  # Reload Hyprland config
+  if command -v hyprctl >/dev/null 2>&1; then
+    hyprctl reload 2>/dev/null || true
+  fi
+  
+  # Set wallpaper for the new theme
+  if [[ -x "$SCRIPT_DIR/hyprvoid-theme-bg-set" ]]; then
+    "$SCRIPT_DIR/hyprvoid-theme-bg-set" "$theme" || true
+  fi
+  
+  notify "Theme Changed" "Switched to ${theme^} theme"
+  log "Theme set to $theme successfully"
+}
+
+main() {
+  local mode="${1:-toggle}"
+  
+  case "$mode" in
+    dark)
+      set_theme "dark"
+      ;;
+    light)
+      set_theme "light"
+      ;;
+    toggle)
+      current="$(detect_theme)"
+      if [[ "$current" == "dark" ]]; then
+        set_theme "light"
+      else
+        set_theme "dark"
+      fi
+      ;;
+    *)
+      echo "Usage: $0 [dark|light|toggle]"
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

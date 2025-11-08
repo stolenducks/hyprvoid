@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# HyprVoid VS Code/Cursor Theme Setter
+# Sets VS Code and Cursor color theme from current theme
+
+set -Eeuo pipefail
+
+THEME_FILE="$HOME/.config/hyprvoid/current/theme/vscode.json"
+
+if [[ ! -f "$THEME_FILE" ]] || ! command -v jq >/dev/null 2>&1; then
+  exit 0
+fi
+
+THEME_NAME=$(jq -r '.name' "$THEME_FILE")
+
+# Update VS Code settings if it exists
+VSCODE_SETTINGS="$HOME/.config/Code/User/settings.json"
+if [[ -f "$VSCODE_SETTINGS" ]]; then
+  # Create workbench.colorTheme entry if missing
+  if ! grep -q '"workbench.colorTheme"' "$VSCODE_SETTINGS"; then
+    sed -i '0,/{/{s/{/{ "workbench.colorTheme": "",/}' "$VSCODE_SETTINGS"
+  fi
+  
+  # Update theme name
+  sed -i -E "s/(\"workbench.colorTheme\"[[:space:]]*:[[:space:]]*\")[^\"]*(\")/ \1$THEME_NAME\2/" "$VSCODE_SETTINGS"
+fi
+
+# Update Cursor settings if it exists
+CURSOR_SETTINGS="$HOME/.config/Cursor/User/settings.json"
+if [[ -f "$CURSOR_SETTINGS" ]]; then
+  # Create workbench.colorTheme entry if missing
+  if ! grep -q '"workbench.colorTheme"' "$CURSOR_SETTINGS"; then
+    sed -i '0,/{/{s/{/{ "workbench.colorTheme": "",/}' "$CURSOR_SETTINGS"
+  fi
+  
+  # Update theme name
+  sed -i -E "s/(\"workbench.colorTheme\"[[:space:]]*:[[:space:]]*\")[^\"]*(\")/ \1$THEME_NAME\2/" "$CURSOR_SETTINGS"
+fi

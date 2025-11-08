@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# HyprVoid Terminal Theme Setter
+# Reloads terminal emulators to pick up new theme
+
+set -Eeuo pipefail
+
+# Reload Ghostty (SIGUSR2 reloads config)
+killall -SIGUSR2 ghostty 2>/dev/null || true
+
+# Reload Kitty (SIGUSR1 reloads config)
+killall -SIGUSR1 kitty 2>/dev/null || true
+
+# Touch Alacritty config to trigger reload if it watches files
+if [[ -f ~/.config/alacritty/alacritty.toml ]]; then
+  touch ~/.config/alacritty/alacritty.toml
+fi

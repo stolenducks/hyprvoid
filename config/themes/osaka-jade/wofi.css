@@ -1,0 +1,35 @@
+/* HyprVoid - Osaka Jade Theme */
+/* Wofi launcher styling */
+
+window {
+  margin: 0;
+  padding: 0;
+  border: 2px solid #71CEAD;
+  background-color: rgba(17, 34, 28, 0.95);
+  border-radius: 0;
+}
+
+#input {
+  margin: 12px;
+  padding: 12px;
+  color: #e6d8ba;
+  background-color: #11221C;
+  border: none;
+  border-radius: 0;
+}
+
+#text {
+  margin: 0;
+  padding: 0;
+  color: #e6d8ba;
+}
+
+#entry:selected {
+  background-color: #214237;
+  border-radius: 0;
+}
+
+#entry:selected #text {
+  color: #71CEAD;
+  font-weight: 600;
+}

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# HyprVoid Theme Cycler
+# Cycles to next theme
+
+set -Eeuo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/hyprvoid-lib"
+
+THEMES_DIR="$HOME/.config/hyprvoid/themes"
+CURRENT_THEME_LINK="$HOME/.config/hyprvoid/current/theme"
+
+THEMES=($(find "$THEMES_DIR" -mindepth 1 -maxdepth 1 -type d | sort))
+TOTAL=${#THEMES[@]}
+
+if [[ $TOTAL -eq 0 ]]; then
+  notify "Theme Error" "No themes found"
+  exit 1
+fi
+
+# Get current theme from symlink
+if [[ -L "$CURRENT_THEME_LINK" ]]; then
+  CURRENT_THEME=$(realpath "$CURRENT_THEME_LINK")
+else
+  # Default to first theme
+  CURRENT_THEME=$(realpath "${THEMES[0]}")
+fi
+
+# Find current theme index
+INDEX=0
+for i in "${!THEMES[@]}"; do
+  THEMES[$i]=$(realpath "${THEMES[$i]}")
+  
+  if [[ "${THEMES[$i]}" == "$CURRENT_THEME" ]]; then
+    INDEX=$i
+    break
+  fi
+done
+
+# Get next theme (wrap around)
+NEXT_INDEX=$(((INDEX + 1) % TOTAL))
+NEW_THEME=${THEMES[$NEXT_INDEX]}
+NEW_THEME_NAME=$(basename "$NEW_THEME")
+
+"$SCRIPT_DIR/hyprvoid-theme-set" "$NEW_THEME_NAME"

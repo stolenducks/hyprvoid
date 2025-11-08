@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# HyprVoid GTK Theme Setter
+# Sets GTK icon theme from current theme
+
+set -Eeuo pipefail
+
+THEME_FILE="$HOME/.config/hyprvoid/current/theme/icons.theme"
+
+if [[ ! -f "$THEME_FILE" ]]; then
+  exit 0
+fi
+
+ICON_THEME=$(cat "$THEME_FILE")
+
+# Set via gsettings if available
+if command -v gsettings >/dev/null 2>&1; then
+  gsettings set org.gnome.desktop.interface icon-theme "$ICON_THEME" 2>/dev/null || true
+fi
+
+# Update GTK 3 settings.ini
+GTK3_SETTINGS="$HOME/.config/gtk-3.0/settings.ini"
+mkdir -p "$(dirname "$GTK3_SETTINGS")"
+
+if [[ ! -f "$GTK3_SETTINGS" ]]; then
+  cat > "$GTK3_SETTINGS" << EOF
+[Settings]
+gtk-icon-theme-name=$ICON_THEME
+gtk-theme-name=Adwaita-dark
+gtk-application-prefer-dark-theme=1
+EOF
+else
+  # Update existing
+  if grep -q "gtk-icon-theme-name" "$GTK3_SETTINGS"; then
+    sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME/" "$GTK3_SETTINGS"
+  else
+    echo "gtk-icon-theme-name=$ICON_THEME" >> "$GTK3_SETTINGS"
+  fi
+fi
+
+# Update GTK 4 settings.ini
+GTK4_SETTINGS="$HOME/.config/gtk-4.0/settings.ini"
+mkdir -p "$(dirname "$GTK4_SETTINGS")"
+
+if [[ ! -f "$GTK4_SETTINGS" ]]; then
+  cat > "$GTK4_SETTINGS" << EOF
+[Settings]
+gtk-icon-theme-name=$ICON_THEME
+gtk-theme-name=Adwaita-dark
+gtk-application-prefer-dark-theme=1
+EOF
+else
+  # Update existing
+  if grep -q "gtk-icon-theme-name" "$GTK4_SETTINGS"; then
+    sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME/" "$GTK4_SETTINGS"
+  else
+    echo "gtk-icon-theme-name=$ICON_THEME" >> "$GTK4_SETTINGS"
+  fi
+fi
